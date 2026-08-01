@@ -42,3 +42,13 @@ export function getAuthUser(req: NextRequest): JWTPayload | null {
 export function unauthorizedResponse() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
 }
+
+export function forbiddenResponse() {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+}
+
+export function requireAdmin(user: JWTPayload | null) {
+    if (!user) return unauthorizedResponse();
+    if (user.role !== "admin") return forbiddenResponse();
+    return null;
+}
