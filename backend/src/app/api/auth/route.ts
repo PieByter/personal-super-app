@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
                 })
                 .returning({ id: users.id, email: users.email, fullName: users.fullName });
 
-            const token = generateToken(user.id, user.email);
-            return Response.json({ user, token });
+            const token = generateToken(user.id, user.email, user.role || "user");
+            return Response.json({ user: { ...user, role: user.role || "user" }, token });
         }
 
         if (action === "login") {
@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
                 return Response.json({ error: "Invalid credentials" }, { status: 401 });
             }
 
-            const token = generateToken(user.id, user.email);
+            const token = generateToken(user.id, user.email, user.role || "user");
             return Response.json({
-                user: { id: user.id, email: user.email, fullName: user.fullName },
+                user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role || "user" },
                 token,
             });
         }

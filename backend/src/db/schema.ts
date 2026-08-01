@@ -14,6 +14,7 @@ export const habitFrequencyEnum = pgEnum("habit_frequency", ["daily", "weekly", 
 export const itemConditionEnum = pgEnum("item_condition", ["excellent", "good", "fair", "poor", "broken"]);
 export const bookmarkStatusEnum = pgEnum("bookmark_status", ["unread", "reading", "completed", "archived"]);
 export const billingCycleEnum = pgEnum("billing_cycle", ["weekly", "monthly", "quarterly", "yearly", "lifetime"]);
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
 
 // Users
 export const users = pgTable("users", {
@@ -24,6 +25,7 @@ export const users = pgTable("users", {
     avatarUrl: text("avatar_url"),
     timezone: varchar("timezone", { length: 50 }).default("Asia/Jakarta"),
     currency: varchar("currency", { length: 10 }).default("IDR"),
+    role: userRoleEnum("role").default("user"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

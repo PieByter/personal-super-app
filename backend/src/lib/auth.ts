@@ -7,6 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key-change-in-pr
 export interface JWTPayload {
     userId: string;
     email: string;
+    role: string;
     iat: number;
     exp: number;
 }
@@ -19,8 +20,8 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
     return bcrypt.compare(password, hash);
 }
 
-export function generateToken(userId: string, email: string): string {
-    return jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: "7d" });
+export function generateToken(userId: string, email: string, role: string = "user"): string {
+    return jwt.sign({ userId, email, role }, JWT_SECRET, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): JWTPayload {

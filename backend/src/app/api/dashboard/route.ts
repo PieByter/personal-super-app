@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
 import {
+    users,
     financeTransactions,
     projects,
     projectTasks,
@@ -18,9 +19,35 @@ export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
     if (!user) return unauthorizedResponse();
 
+    // Admin dashboard - return system-wide stats
+    if (user.role === "admin") {
+        const [userCount] = await db.select({ total: count(users.id) }).from(users);
+        const [totalTransactions] = await db.select({ total: count(financeTransactions.id) }).from(financeTransactions);
+        const [totalProjects] = await db.select({ total: count(projects.id) }).from(projects);
+        const [totalTasks] = await db.select({ total: count(projectTasks.id) }).from(projectTasks);
+        const [totalHabits] = await db.select({ total: count(habits.id) }).from(habits);
+        const [totalJobs] = await db.select({ total: count(jobApplications.id) }).from(jobApplications);
+        const [totalBugs] = await db.select({ total: count(bugEntries.id) }).from(bugEntries);
+        const [totalSubscriptions] = await db.select({ total: count(subscriptions.id) }).from(subscriptions);
+
+        return Response.json({
+            isAdmin: true,
+            systemStats: {
+                totalUsers: userCount?.total || 0,
+                totalTransactions: totalTransactions?.total || 0,
+                totalProjects: totalProjects?.total || 0,
+                totalTasks: totalTasks?.total || 0,
+                totalHabits: totalHabits?.total || 0,
+                totalJobs: totalJobs?.total || 0,
+                totalBugs: totalBugs?.total || 0,
+                totalSubscriptions: totalSubscriptions?.total || 0,
+            },
+        });
+    }
+
+    // Regular user dashboard
     const now = new Date();
     const monthStart = startOfMonth(now);
-    const monthEnd = endOfMonth(now);
     const weekAgo = subDays(now, 7);
 
     // Finance summary
@@ -112,6 +139,7 @@ export async function GET(req: NextRequest) {
         );
 
     return Response.json({
+        isAdmin: false,
         finance: {
             monthIncome: financeSummary?.totalIncome || "0",
             monthExpense: financeSummary?.totalExpense || "0",
