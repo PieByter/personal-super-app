@@ -61,7 +61,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    AppColors.subscriptions.withOpacity(0.2),
+                                    AppColors.subscriptions.withValues(alpha: 0.2),
                                 child: const Icon(Icons.subscriptions,
                                     color: AppColors.subscriptions),
                               ),

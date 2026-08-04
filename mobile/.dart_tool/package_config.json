@@ -224,6 +224,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_lints",
+      "rootUri": "file:///C:/Users/Pieter%20Tanoto/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_lints-6.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
+    },
+    {
       "name": "flutter_local_notifications",
       "rootUri": "file:///C:/Users/Pieter%20Tanoto/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_local_notifications-20.1.0",
       "packageUri": "lib/",
@@ -366,6 +372,12 @@
       "rootUri": "file:///C:/Users/Pieter%20Tanoto/AppData/Local/Pub/Cache/hosted/pub.dev/jni_util-1.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "lints",
+      "rootUri": "file:///C:/Users/Pieter%20Tanoto/AppData/Local/Pub/Cache/hosted/pub.dev/lints-6.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.8"
     },
     {
       "name": "local_auth",

@@ -70,7 +70,7 @@ class _JobsScreenState extends State<JobsScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    _statusColor(entry.status).withOpacity(0.2),
+                                    _statusColor(entry.status).withValues(alpha: 0.2),
                                 child: Icon(Icons.work,
                                     color: _statusColor(entry.status)),
                               ),

@@ -70,7 +70,7 @@ class _BugsScreenState extends State<BugsScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: _severityColor(entry.severity)
-                                    .withOpacity(0.2),
+                                    .withValues(alpha: 0.2),
                                 child: Icon(Icons.bug_report,
                                     color: _severityColor(entry.severity)),
                               ),
@@ -83,7 +83,7 @@ class _BugsScreenState extends State<BugsScreen> {
                               trailing: Chip(
                                 label: Text(entry.severity),
                                 backgroundColor: _severityColor(entry.severity)
-                                    .withOpacity(0.2),
+                                    .withValues(alpha: 0.2),
                                 side: BorderSide.none,
                               ),
                               onTap: () {},

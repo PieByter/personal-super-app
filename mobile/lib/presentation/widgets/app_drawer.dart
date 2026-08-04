@@ -66,6 +66,12 @@ class AppDrawer extends StatelessWidget {
         '/bookmarks',
         AppColors.bookmarks,
       ),
+      _ModuleItem(
+        'Settings',
+        Icons.settings_outlined,
+        '/settings',
+        AppColors.dashboard,
+      ),
     ];
 
     return Drawer(
@@ -90,8 +96,8 @@ class AppDrawer extends StatelessWidget {
                   Text(
                     'Personal Super App',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   Text(
                     'Your personal operating system',
@@ -120,7 +126,7 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                   selected: isSelected,
-                  selectedTileColor: module.color.withOpacity(0.1),
+                  selectedTileColor: module.color.withValues(alpha: 0.1),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

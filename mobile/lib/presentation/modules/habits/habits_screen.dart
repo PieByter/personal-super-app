@@ -61,7 +61,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    AppColors.habits.withOpacity(0.2),
+                                    AppColors.habits.withValues(alpha: 0.2),
                                 child: const Icon(Icons.check_circle,
                                     color: AppColors.habits),
                               ),

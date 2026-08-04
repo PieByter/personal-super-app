@@ -37,7 +37,16 @@
         "timezone",
         "url_launcher"
       ],
-      "devDependencies": []
+      "devDependencies": [
+        "flutter_lints"
+      ]
+    },
+    {
+      "name": "flutter_lints",
+      "version": "6.0.0",
+      "dependencies": [
+        "lints"
+      ]
     },
     {
       "name": "multi_select_flutter",
@@ -330,6 +339,11 @@
         "sky_engine",
         "vector_math"
       ]
+    },
+    {
+      "name": "lints",
+      "version": "6.1.0",
+      "dependencies": []
     },
     {
       "name": "collection",

@@ -124,8 +124,8 @@ class _FinanceScreenState extends State<FinanceScreen>
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: isIncome
-                        ? AppColors.finance.withOpacity(0.2)
-                        : AppColors.bugs.withOpacity(0.2),
+                        ? AppColors.finance.withValues(alpha: 0.2)
+                        : AppColors.bugs.withValues(alpha: 0.2),
                     child: Icon(
                       isIncome ? Icons.arrow_upward : Icons.arrow_downward,
                       color: isIncome ? AppColors.finance : AppColors.bugs,
@@ -164,9 +164,9 @@ class _FinanceScreenState extends State<FinanceScreen>
         Text(
           'Rp ${NumberFormat('#,###').format(amount)}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );

@@ -48,33 +48,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-            ? Center(child: Text('Error: $_error'))
-            : _data == null
-            ? const Center(child: Text('No data'))
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle('Overview'),
-                    const SizedBox(height: 12),
-                    _buildStatsGrid(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Finance This Month'),
-                    const SizedBox(height: 12),
-                    _buildFinanceCard(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Active Habits (7 days)'),
-                    const SizedBox(height: 12),
-                    _buildHabitsList(),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle('Quick Access'),
-                    const SizedBox(height: 12),
-                    _buildQuickAccessGrid(),
-                  ],
-                ),
-              ),
+                ? Center(child: Text('Error: $_error'))
+                : _data == null
+                    ? const Center(child: Text('No data'))
+                    : SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSectionTitle('Overview'),
+                            const SizedBox(height: 12),
+                            _buildStatsGrid(),
+                            const SizedBox(height: 24),
+                            _buildSectionTitle('Finance This Month'),
+                            const SizedBox(height: 12),
+                            _buildFinanceCard(),
+                            const SizedBox(height: 24),
+                            _buildSectionTitle('Active Habits (7 days)'),
+                            const SizedBox(height: 12),
+                            _buildHabitsList(),
+                            const SizedBox(height: 24),
+                            _buildSectionTitle('Quick Access'),
+                            const SizedBox(height: 12),
+                            _buildQuickAccessGrid(),
+                          ],
+                        ),
+                      ),
       ),
     );
   }
@@ -131,9 +131,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 stat.value,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: stat.color,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: stat.color,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -169,9 +169,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text(
                     'Rp ${_data!.finance.monthIncome}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.finance,
-                      fontWeight: FontWeight.bold,
-                    ),
+                          color: AppColors.finance,
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),
@@ -193,9 +193,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text(
                       'Rp ${_data!.finance.monthExpense}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.bugs,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: AppColors.bugs,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -223,7 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: AppColors.habits.withOpacity(0.2),
+              backgroundColor: AppColors.habits.withValues(alpha: 0.2),
               child: const Icon(Icons.check, color: AppColors.habits),
             ),
             title: Text(h.habitName),

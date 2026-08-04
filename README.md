@@ -4,7 +4,7 @@ Aplikasi super pribadi dengan 10 modul untuk mengelola seluruh aspek kehidupan: 
 
 ## Arsitektur
 
-```
+```text
 personal-super-app/
 ├── backend/          # Next.js + Drizzle ORM + PostgreSQL
 │   ├── src/app/api/  # REST API endpoints
@@ -18,7 +18,7 @@ personal-super-app/
 ## 10 Modules
 
 | # | Module | Description | Color |
-|---|--------|-------------|-------|
+| --- | -------- | ------------- | ------- |
 | 1 | **Finance** | Income/expense, budgets, saving goals, investments | 🟢 Green |
 | 2 | **Dashboard** | Personal life overview & quick access | ⚪ Slate |
 | 3 | **Developer Journal** | Problem-solution database with tags | 🟣 Indigo |
@@ -33,6 +33,7 @@ personal-super-app/
 ## Tech Stack
 
 ### Backend (Vercel Ready)
+
 - **Next.js 15** - API Routes (Serverless)
 - **Drizzle ORM** - Type-safe SQL
 - **PostgreSQL** - Database (Supabase/Neon/Vercel Postgres)
@@ -40,6 +41,7 @@ personal-super-app/
 - **Zod** - Request validation
 
 ### Mobile
+
 - **Flutter 3.5+** - Cross-platform
 - **Go Router** - Navigation
 - **BLoC Pattern** - State management
@@ -49,6 +51,7 @@ personal-super-app/
 ## Getting Started
 
 ### Backend
+
 ```bash
 cd backend
 cp .env.example .env
@@ -58,7 +61,8 @@ npm run db:migrate
 npm run dev
 ```
 
-### Mobile
+### Mobile Apps
+
 ```bash
 cd mobile
 flutter pub get
@@ -66,6 +70,7 @@ flutter run
 ```
 
 ### Database Setup
+
 ```bash
 # Using psql or Supabase SQL Editor
 psql -d your_database -f database/schema.sql
@@ -74,7 +79,7 @@ psql -d your_database -f database/schema.sql
 ## API Endpoints
 
 | Endpoint | Method | Description |
-|----------|--------|-------------|
+| ---------- | -------- | ------------- |
 | `/api/auth` | POST | Login / Register |
 | `/api/dashboard` | GET | Aggregated dashboard data |
 | `/api/finance/transactions` | GET/POST | List / Create transactions |
@@ -90,12 +95,14 @@ psql -d your_database -f database/schema.sql
 ## Deployment
 
 ### Backend to Vercel
+
 ```bash
 cd backend
 vercel --prod
 ```
 
 ### Environment Variables (Vercel)
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - Random secret for token signing
 

@@ -61,7 +61,7 @@ class _JournalScreenState extends State<JournalScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    AppColors.journal.withOpacity(0.2),
+                                    AppColors.journal.withValues(alpha: 0.2),
                                 child: const Icon(Icons.edit_note,
                                     color: AppColors.journal),
                               ),

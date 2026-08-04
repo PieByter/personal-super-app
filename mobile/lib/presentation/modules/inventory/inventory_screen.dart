@@ -61,7 +61,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    AppColors.inventory.withOpacity(0.2),
+                                    AppColors.inventory.withValues(alpha: 0.2),
                                 child: const Icon(Icons.inventory_2,
                                     color: AppColors.inventory),
                               ),

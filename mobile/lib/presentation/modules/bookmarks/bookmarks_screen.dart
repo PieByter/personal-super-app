@@ -61,7 +61,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor:
-                                    AppColors.bookmarks.withOpacity(0.2),
+                                    AppColors.bookmarks.withValues(alpha: 0.2),
                                 child: const Icon(Icons.bookmark,
                                     color: AppColors.bookmarks),
                               ),
