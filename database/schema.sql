@@ -414,20 +414,56 @@ CREATE TABLE bookmarks (
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
+
+-- Finance
 CREATE INDEX idx_transactions_user_date ON finance_transactions(user_id, transaction_date DESC);
 CREATE INDEX idx_transactions_category ON finance_transactions(category_id);
 CREATE INDEX idx_transactions_type ON finance_transactions(type);
+CREATE INDEX idx_finance_categories_user ON finance_categories(user_id);
+CREATE INDEX idx_budgets_user ON finance_budgets(user_id);
+CREATE INDEX idx_saving_goals_user ON finance_saving_goals(user_id);
+CREATE INDEX idx_investments_user ON finance_investments(user_id);
+
+-- Recurring
 CREATE INDEX idx_recurring_next_exec ON finance_recurring_rules(next_execution) WHERE is_active = TRUE;
+
+-- Journal
 CREATE INDEX idx_journal_entries_user ON journal_entries(user_id, created_at DESC);
+CREATE INDEX idx_journal_tags_user ON journal_tags(user_id);
+
+-- Bugs
 CREATE INDEX idx_bugs_user_status ON bug_entries(user_id, status);
 CREATE INDEX idx_bugs_tags ON bug_entries USING GIN(tags);
+
+-- Jobs
 CREATE INDEX idx_job_applications_user ON job_applications(user_id, status);
+CREATE INDEX idx_job_interviews_job ON job_interviews(job_id);
+CREATE INDEX idx_job_contacts_job ON job_contacts(job_id);
+
+-- Projects
 CREATE INDEX idx_projects_user ON projects(user_id, status);
+CREATE INDEX idx_project_tasks_project ON project_tasks(project_id, status);
+CREATE INDEX idx_project_milestones_project ON project_milestones(project_id);
+
+-- Habits
+CREATE INDEX idx_habits_user ON habits(user_id);
 CREATE INDEX idx_habit_logs_habit_date ON habit_logs(habit_id, log_date DESC);
 CREATE INDEX idx_daily_metrics_user_date ON daily_metrics(user_id, metric_date DESC);
+
+-- Subscriptions
 CREATE INDEX idx_subscriptions_user ON subscriptions(user_id, next_renewal_date);
+CREATE INDEX idx_subscription_payments_sub ON subscription_payments(subscription_id);
+
+-- Inventory
 CREATE INDEX idx_inventory_user ON inventory_items(user_id, category_id);
+CREATE INDEX idx_inventory_categories_user ON inventory_categories(user_id);
+
+-- Bookmarks
 CREATE INDEX idx_bookmarks_user ON bookmarks(user_id, collection_id);
+CREATE INDEX idx_bookmark_collections_user ON bookmark_collections(user_id);
+
+-- Users
+CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_bookmarks_tags ON bookmarks USING GIN(tags);
 
 -- =====================================================

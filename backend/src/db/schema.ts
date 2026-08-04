@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, time, jsonb, array, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, time, jsonb, pgEnum } from "drizzle-orm/pg-core";
 
 // Enums
 export const transactionTypeEnum = pgEnum("transaction_type", ["income", "expense"]);
@@ -53,7 +53,7 @@ export const financeTransactions = pgTable("finance_transactions", {
     paymentMethod: varchar("payment_method", { length: 50 }),
     isRecurring: boolean("is_recurring").default(false),
     recurringRuleId: uuid("recurring_rule_id"),
-    tags: array(varchar("tags", { length: 50 })),
+    tags: varchar("tags", { length: 50 }).array(),
     attachmentUrl: text("attachment_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -164,7 +164,7 @@ export const bugEntries = pgTable("bug_entries", {
     solution: text("solution"),
     status: bugStatusEnum("status").default("open"),
     severity: bugSeverityEnum("severity").default("medium"),
-    tags: array(varchar("tags", { length: 50 })),
+    tags: varchar("tags", { length: 50 }).array(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     solvedAt: timestamp("solved_at", { withTimezone: true }),
@@ -230,7 +230,7 @@ export const projects = pgTable("projects", {
     startDate: date("start_date"),
     targetDate: date("target_date"),
     completedDate: date("completed_date"),
-    techStack: array(varchar("tech_stack", { length: 50 })),
+    techStack: varchar("tech_stack", { length: 50 }).array(),
     gitRepository: text("git_repository"),
     documentationUrl: text("documentation_url"),
     color: varchar("color", { length: 7 }).default("#8B5CF6"),
@@ -259,7 +259,7 @@ export const projectTasks = pgTable("project_tasks", {
     priority: priorityEnum("priority").default("medium"),
     dueDate: date("due_date"),
     completedAt: timestamp("completed_at", { withTimezone: true }),
-    tags: array(varchar("tags", { length: 50 })),
+    tags: varchar("tags", { length: 50 }).array(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -275,7 +275,7 @@ export const habits = pgTable("habits", {
     targetValue: decimal("target_value", { precision: 10, scale: 2 }).default("1"),
     unit: varchar("unit", { length: 50 }),
     frequency: habitFrequencyEnum("frequency").notNull(),
-    targetDays: array(integer("target_days")).default([1, 2, 3, 4, 5, 6, 7]),
+    targetDays: integer("target_days").array().default([1, 2, 3, 4, 5, 6, 7]),
     reminderTime: time("reminder_time"),
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
@@ -366,8 +366,8 @@ export const inventoryItems = pgTable("inventory_items", {
     location: varchar("location", { length: 100 }),
     warrantyExpiry: date("warranty_expiry"),
     receiptUrl: text("receipt_url"),
-    photoUrls: array(text("photo_urls")),
-    tags: array(varchar("tags", { length: 50 })),
+    photoUrls: text("photo_urls").array(),
+    tags: varchar("tags", { length: 50 }).array(),
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
@@ -396,7 +396,7 @@ export const bookmarks = pgTable("bookmarks", {
     status: bookmarkStatusEnum("status").default("unread"),
     rating: integer("rating"),
     isFavorite: boolean("is_favorite").default(false),
-    tags: array(varchar("tags", { length: 50 })),
+    tags: varchar("tags", { length: 50 }).array(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
