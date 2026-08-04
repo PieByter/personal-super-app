@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/habit.dart';
@@ -76,14 +77,15 @@ class _HabitsScreenState extends State<HabitsScreen> {
                                       color: Colors.green)
                                   : const Icon(Icons.notifications_off,
                                       color: Colors.grey),
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/habits/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/habits/new'),
         backgroundColor: AppColors.habits,
         child: const Icon(Icons.add),
       ),

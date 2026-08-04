@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/journal.dart';
@@ -74,14 +75,15 @@ class _JournalScreenState extends State<JournalScreen> {
                               trailing: entry.isFavorite
                                   ? const Icon(Icons.star, color: Colors.amber)
                                   : null,
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/journal/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/journal/new'),
         backgroundColor: AppColors.journal,
         child: const Icon(Icons.add),
       ),

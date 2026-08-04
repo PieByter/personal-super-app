@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/bug.dart';
@@ -86,14 +87,15 @@ class _BugsScreenState extends State<BugsScreen> {
                                     .withValues(alpha: 0.2),
                                 side: BorderSide.none,
                               ),
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/bugs/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/bugs/new'),
         backgroundColor: AppColors.bugs,
         child: const Icon(Icons.add),
       ),

@@ -142,6 +142,8 @@ class _FinanceScreenState extends State<FinanceScreen>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  onTap: () =>
+                      context.go('/finance/transactions/edit', extra: t),
                 ),
               );
             },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/inventory.dart';
@@ -78,14 +79,15 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                           fontWeight: FontWeight.bold),
                                     )
                                   : null,
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/inventory/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/inventory/new'),
         backgroundColor: AppColors.inventory,
         child: const Icon(Icons.add),
       ),

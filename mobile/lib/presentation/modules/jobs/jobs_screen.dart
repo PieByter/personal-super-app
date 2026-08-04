@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/job.dart';
@@ -69,8 +70,8 @@ class _JobsScreenState extends State<JobsScreen> {
                                 horizontal: 16, vertical: 8),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor:
-                                    _statusColor(entry.status).withValues(alpha: 0.2),
+                                backgroundColor: _statusColor(entry.status)
+                                    .withValues(alpha: 0.2),
                                 child: Icon(Icons.work,
                                     color: _statusColor(entry.status)),
                               ),
@@ -83,14 +84,15 @@ class _JobsScreenState extends State<JobsScreen> {
                               trailing: entry.isFavorite
                                   ? const Icon(Icons.star, color: Colors.amber)
                                   : null,
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/jobs/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/jobs/new'),
         backgroundColor: AppColors.jobs,
         child: const Icon(Icons.add),
       ),

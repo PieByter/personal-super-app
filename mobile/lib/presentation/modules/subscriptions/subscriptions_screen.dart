@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/subscription.dart';
@@ -60,8 +61,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                 horizontal: 16, vertical: 8),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor:
-                                    AppColors.subscriptions.withValues(alpha: 0.2),
+                                backgroundColor: AppColors.subscriptions
+                                    .withValues(alpha: 0.2),
                                 child: const Icon(Icons.subscriptions,
                                     color: AppColors.subscriptions),
                               ),
@@ -76,14 +77,15 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               ),
-                              onTap: () {},
+                              onTap: () => context.go('/subscriptions/edit',
+                                  extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/subscriptions/new'),
         backgroundColor: AppColors.subscriptions,
         child: const Icon(Icons.add),
       ),

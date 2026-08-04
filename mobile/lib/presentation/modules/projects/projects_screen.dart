@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/project.dart';
@@ -69,8 +70,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 horizontal: 16, vertical: 8),
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundColor:
-                                    _statusColor(entry.status).withValues(alpha: 0.2),
+                                backgroundColor: _statusColor(entry.status)
+                                    .withValues(alpha: 0.2),
                                 child: Icon(Icons.folder,
                                     color: _statusColor(entry.status)),
                               ),
@@ -83,14 +84,15 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                               trailing: entry.progress != null
                                   ? Text('${entry.progress}%')
                                   : null,
-                              onTap: () {},
+                              onTap: () =>
+                                  context.go('/projects/edit', extra: entry),
                             ),
                           );
                         },
                       ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.go('/projects/new'),
         backgroundColor: AppColors.projects,
         child: const Icon(Icons.add),
       ),
