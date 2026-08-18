@@ -54,236 +54,239 @@ import '../domain/models/bookmark.dart';
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-  static GoRouter get router => GoRouter(
-        navigatorKey: _rootNavigatorKey,
-        initialLocation: '/login',
-        routes: [
-          GoRoute(
-              path: '/login', builder: (context, state) => const LoginScreen()),
-          GoRoute(
-            path: '/dashboard',
-            builder: (context, state) => const DashboardScreen(),
-          ),
-          GoRoute(
-            path: '/finance',
-            builder: (context, state) => const FinanceScreen(),
-          ),
-          GoRoute(
-            path: '/finance/transactions/new',
-            builder: (context, state) => const TransactionFormScreen(),
-          ),
-          GoRoute(
-            path: '/finance/transactions/edit',
-            builder: (context, state) => TransactionFormScreen(
-              transaction: state.extra as Transaction?,
-            ),
-          ),
-          GoRoute(
-            path: '/finance/budgets/new',
-            builder: (context, state) => const BudgetFormScreen(),
-          ),
-          GoRoute(
-            path: '/finance/budgets/edit',
-            builder: (context, state) => BudgetFormScreen(
-              budget: state.extra as Budget?,
-            ),
-          ),
-          GoRoute(
-            path: '/finance/goals/new',
-            builder: (context, state) => const GoalFormScreen(),
-          ),
-          GoRoute(
-            path: '/finance/goals/edit',
-            builder: (context, state) => GoalFormScreen(
-              goal: state.extra as SavingGoal?,
-            ),
-          ),
-          GoRoute(
-            path: '/finance/investments/new',
-            builder: (context, state) => const InvestmentFormScreen(),
-          ),
-          GoRoute(
-            path: '/finance/investments/edit',
-            builder: (context, state) => InvestmentFormScreen(
-              investment: state.extra as Investment?,
-            ),
-          ),
-          GoRoute(
-            path: '/finance/categories',
-            builder: (context, state) => const FinanceCategoryFormScreen(),
-          ),
-          GoRoute(
-            path: '/journal',
-            builder: (context, state) => const JournalScreen(),
-          ),
-          GoRoute(
-            path: '/journal/new',
-            builder: (context, state) => const JournalEntryFormScreen(),
-          ),
-          GoRoute(
-            path: '/journal/edit',
-            builder: (context, state) => JournalEntryFormScreen(
-              entry: state.extra as JournalEntry?,
-            ),
-          ),
-          GoRoute(
-            path: '/journal/tags',
-            builder: (context, state) => const JournalTagsScreen(),
-          ),
-          GoRoute(
-              path: '/bugs', builder: (context, state) => const BugsScreen()),
-          GoRoute(
-            path: '/bugs/new',
-            builder: (context, state) => const BugFormScreen(),
-          ),
-          GoRoute(
-            path: '/bugs/edit',
-            builder: (context, state) => BugFormScreen(
-              bug: state.extra as BugEntry?,
-            ),
-          ),
-          GoRoute(
-              path: '/jobs', builder: (context, state) => const JobsScreen()),
-          GoRoute(
-            path: '/jobs/new',
-            builder: (context, state) => const JobFormScreen(),
-          ),
-          GoRoute(
-            path: '/jobs/edit',
-            builder: (context, state) => JobFormScreen(
-              job: state.extra as JobApplication?,
-            ),
-          ),
-          GoRoute(
-            path: '/jobs/contacts',
-            builder: (context, state) => JobContactsScreen(
-              job: state.extra as JobApplication,
-            ),
-          ),
-          GoRoute(
-            path: '/jobs/interviews',
-            builder: (context, state) => JobInterviewsScreen(
-              job: state.extra as JobApplication,
-            ),
-          ),
-          GoRoute(
-            path: '/projects',
-            builder: (context, state) => const ProjectsScreen(),
-          ),
-          GoRoute(
-            path: '/projects/new',
-            builder: (context, state) => const ProjectFormScreen(),
-          ),
-          GoRoute(
-            path: '/projects/edit',
-            builder: (context, state) => ProjectFormScreen(
-              project: state.extra as Project?,
-            ),
-          ),
-          GoRoute(
-            path: '/projects/tasks',
-            builder: (context, state) => ProjectTasksScreen(
-              project: state.extra as Project,
-            ),
-          ),
-          GoRoute(
-            path: '/projects/milestones',
-            builder: (context, state) => ProjectMilestonesScreen(
-              project: state.extra as Project,
-            ),
-          ),
-          GoRoute(
-            path: '/habits',
-            builder: (context, state) => const HabitsScreen(),
-          ),
-          GoRoute(
-            path: '/habits/new',
-            builder: (context, state) => const HabitFormScreen(),
-          ),
-          GoRoute(
-            path: '/habits/edit',
-            builder: (context, state) => HabitFormScreen(
-              habit: state.extra as Habit?,
-            ),
-          ),
-          GoRoute(
-            path: '/habits/logs',
-            builder: (context, state) => HabitLogsScreen(
-              habit: state.extra as Habit,
-            ),
-          ),
-          GoRoute(
-            path: '/habits/metrics',
-            builder: (context, state) => const DailyMetricsScreen(),
-          ),
-          GoRoute(
-            path: '/subscriptions',
-            builder: (context, state) => const SubscriptionsScreen(),
-          ),
-          GoRoute(
-            path: '/subscriptions/new',
-            builder: (context, state) => const SubscriptionFormScreen(),
-          ),
-          GoRoute(
-            path: '/subscriptions/edit',
-            builder: (context, state) => SubscriptionFormScreen(
-              subscription: state.extra as Subscription?,
-            ),
-          ),
-          GoRoute(
-            path: '/subscriptions/payments',
-            builder: (context, state) => SubscriptionPaymentsScreen(
-              subscription: state.extra as Subscription,
-            ),
-          ),
-          GoRoute(
-            path: '/inventory',
-            builder: (context, state) => const InventoryScreen(),
-          ),
-          GoRoute(
-            path: '/inventory/new',
-            builder: (context, state) => const InventoryItemFormScreen(),
-          ),
-          GoRoute(
-            path: '/inventory/edit',
-            builder: (context, state) => InventoryItemFormScreen(
-              item: state.extra as InventoryItem?,
-            ),
-          ),
-          GoRoute(
-            path: '/inventory/categories',
-            builder: (context, state) => const InventoryCategoriesScreen(),
-          ),
-          GoRoute(
-            path: '/bookmarks',
-            builder: (context, state) => const BookmarksScreen(),
-          ),
-          GoRoute(
-            path: '/bookmarks/new',
-            builder: (context, state) => const BookmarkFormScreen(),
-          ),
-          GoRoute(
-            path: '/bookmarks/edit',
-            builder: (context, state) => BookmarkFormScreen(
-              bookmark: state.extra as Bookmark?,
-            ),
-          ),
-          GoRoute(
-            path: '/bookmarks/collections',
-            builder: (context, state) => const BookmarkCollectionsScreen(),
-          ),
-          GoRoute(
-            path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
-          ),
-          GoRoute(
-            path: '/settings/export',
-            builder: (context, state) => const ExportScreen(),
-          ),
-          GoRoute(
-            path: '/settings/profile',
-            builder: (context, state) => const ProfileScreen(),
-          ),
-        ],
-      );
+  static final GoRouter router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: '/login',
+    routes: [
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: '/finance',
+        builder: (context, state) => const FinanceScreen(),
+      ),
+      GoRoute(
+        path: '/finance/transactions/new',
+        builder: (context, state) => const TransactionFormScreen(),
+      ),
+      GoRoute(
+        path: '/finance/transactions/edit',
+        builder: (context, state) => TransactionFormScreen(
+          transaction: state.extra as Transaction?,
+        ),
+      ),
+      GoRoute(
+        path: '/finance/budgets/new',
+        builder: (context, state) => const BudgetFormScreen(),
+      ),
+      GoRoute(
+        path: '/finance/budgets/edit',
+        builder: (context, state) => BudgetFormScreen(
+          budget: state.extra as Budget?,
+        ),
+      ),
+      GoRoute(
+        path: '/finance/goals/new',
+        builder: (context, state) => const GoalFormScreen(),
+      ),
+      GoRoute(
+        path: '/finance/goals/edit',
+        builder: (context, state) => GoalFormScreen(
+          goal: state.extra as SavingGoal?,
+        ),
+      ),
+      GoRoute(
+        path: '/finance/investments/new',
+        builder: (context, state) => const InvestmentFormScreen(),
+      ),
+      GoRoute(
+        path: '/finance/investments/edit',
+        builder: (context, state) => InvestmentFormScreen(
+          investment: state.extra as Investment?,
+        ),
+      ),
+      GoRoute(
+        path: '/finance/categories',
+        builder: (context, state) => const FinanceCategoryFormScreen(),
+      ),
+      GoRoute(
+        path: '/journal',
+        builder: (context, state) => const JournalScreen(),
+      ),
+      GoRoute(
+        path: '/journal/new',
+        builder: (context, state) => const JournalEntryFormScreen(),
+      ),
+      GoRoute(
+        path: '/journal/edit',
+        builder: (context, state) => JournalEntryFormScreen(
+          entry: state.extra as JournalEntry?,
+        ),
+      ),
+      GoRoute(
+        path: '/journal/tags',
+        builder: (context, state) => const JournalTagsScreen(),
+      ),
+      GoRoute(path: '/bugs', builder: (context, state) => const BugsScreen()),
+      GoRoute(
+        path: '/bugs/new',
+        builder: (context, state) => const BugFormScreen(),
+      ),
+      GoRoute(
+        path: '/bugs/edit',
+        builder: (context, state) => BugFormScreen(
+          bug: state.extra as BugEntry?,
+        ),
+      ),
+      GoRoute(path: '/jobs', builder: (context, state) => const JobsScreen()),
+      GoRoute(
+        path: '/jobs/new',
+        builder: (context, state) => const JobFormScreen(),
+      ),
+      GoRoute(
+        path: '/jobs/edit',
+        builder: (context, state) => JobFormScreen(
+          job: state.extra as JobApplication?,
+        ),
+      ),
+      GoRoute(
+        path: '/jobs/contacts',
+        builder: (context, state) => JobContactsScreen(
+          job: state.extra as JobApplication,
+        ),
+      ),
+      GoRoute(
+        path: '/jobs/interviews',
+        builder: (context, state) => JobInterviewsScreen(
+          job: state.extra as JobApplication,
+        ),
+      ),
+      GoRoute(
+        path: '/projects',
+        builder: (context, state) => const ProjectsScreen(),
+      ),
+      GoRoute(
+        path: '/projects/new',
+        builder: (context, state) => const ProjectFormScreen(),
+      ),
+      GoRoute(
+        path: '/projects/edit',
+        builder: (context, state) => ProjectFormScreen(
+          project: state.extra as Project?,
+        ),
+      ),
+      GoRoute(
+        path: '/projects/tasks',
+        builder: (context, state) => ProjectTasksScreen(
+          project: state.extra as Project,
+        ),
+      ),
+      GoRoute(
+        path: '/projects/milestones',
+        builder: (context, state) => ProjectMilestonesScreen(
+          project: state.extra as Project,
+        ),
+      ),
+      GoRoute(
+        path: '/habits',
+        builder: (context, state) => const HabitsScreen(),
+      ),
+      GoRoute(
+        path: '/habits/new',
+        builder: (context, state) => const HabitFormScreen(),
+      ),
+      GoRoute(
+        path: '/habits/edit',
+        builder: (context, state) => HabitFormScreen(
+          habit: state.extra as Habit?,
+        ),
+      ),
+      GoRoute(
+        path: '/habits/logs',
+        builder: (context, state) => HabitLogsScreen(
+          habit: state.extra as Habit,
+        ),
+      ),
+      GoRoute(
+        path: '/habits/metrics',
+        builder: (context, state) => const DailyMetricsScreen(),
+      ),
+      GoRoute(
+        path: '/subscriptions',
+        builder: (context, state) => const SubscriptionsScreen(),
+      ),
+      GoRoute(
+        path: '/subscriptions/new',
+        builder: (context, state) => const SubscriptionFormScreen(),
+      ),
+      GoRoute(
+        path: '/subscriptions/edit',
+        builder: (context, state) => SubscriptionFormScreen(
+          subscription: state.extra as Subscription?,
+        ),
+      ),
+      GoRoute(
+        path: '/subscriptions/payments',
+        builder: (context, state) => SubscriptionPaymentsScreen(
+          subscription: state.extra as Subscription,
+        ),
+      ),
+      GoRoute(
+        path: '/inventory',
+        builder: (context, state) => const InventoryScreen(),
+      ),
+      GoRoute(
+        path: '/inventory/new',
+        builder: (context, state) => const InventoryItemFormScreen(),
+      ),
+      GoRoute(
+        path: '/inventory/edit',
+        builder: (context, state) => InventoryItemFormScreen(
+          item: state.extra as InventoryItem?,
+        ),
+      ),
+      GoRoute(
+        path: '/inventory/categories',
+        builder: (context, state) => const InventoryCategoriesScreen(),
+      ),
+      GoRoute(
+        path: '/bookmarks',
+        builder: (context, state) => const BookmarksScreen(),
+      ),
+      GoRoute(
+        path: '/bookmarks/new',
+        builder: (context, state) => const BookmarkFormScreen(),
+      ),
+      GoRoute(
+        path: '/bookmarks/edit',
+        builder: (context, state) => BookmarkFormScreen(
+          bookmark: state.extra as Bookmark?,
+        ),
+      ),
+      GoRoute(
+        path: '/bookmarks/collections',
+        builder: (context, state) => const BookmarkCollectionsScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/export',
+        builder: (context, state) => const ExportScreen(),
+      ),
+      GoRoute(
+        path: '/settings/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+    ],
+  );
+
+  /// Navigate to the login screen, clearing the navigation stack.
+  /// Used when the session expires (401).
+  static void goToLogin() {
+    router.go('/login');
+  }
 }

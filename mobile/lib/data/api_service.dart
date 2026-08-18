@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants.dart';
@@ -9,6 +10,10 @@ class ApiService {
   ApiService._internal();
 
   String? _token;
+
+  /// Called when the API returns 401 (expired/invalid token).
+  /// The app sets this to redirect the user to the login screen.
+  VoidCallback? onUnauthorized;
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,9 +33,9 @@ class ApiService {
   }
 
   Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    if (_token != null) 'Authorization': 'Bearer $_token',
-  };
+        'Content-Type': 'application/json',
+        if (_token != null) 'Authorization': 'Bearer $_token',
+      };
 
   Future<dynamic> get(String url) async {
     final response = await http.get(Uri.parse(url), headers: _headers);
@@ -61,6 +66,12 @@ class ApiService {
   }
 
   dynamic _handleResponse(http.Response response) {
+    if (response.statusCode == 401) {
+      // Token expired or invalid: clear session and notify the app.
+      clearToken();
+      onUnauthorized?.call();
+      throw Exception('Session expired. Please login again.');
+    }
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return null;
       return jsonDecode(response.body);

@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { jobInterviews } from "@/db/schema";
+import { jobInterviews, jobApplications } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
+import { apiError } from "@/lib/api-error";
 
 const interviewSchema = z.object({
     jobId: z.string().uuid(),
@@ -24,8 +25,14 @@ export async function GET(req: NextRequest) {
     if (!user) return unauthorizedResponse();
     const { searchParams } = new URL(req.url);
     const jobId = searchParams.get("jobId");
-    const conditions = jobId ? [eq(jobInterviews.jobId, jobId)] : [];
-    const rows = await db.select().from(jobInterviews).where(conditions.length > 0 ? conditions[0] : undefined).orderBy(desc(jobInterviews.createdAt));
+    const conditions = [eq(jobApplications.userId, user.userId)];
+    if (jobId) conditions.push(eq(jobInterviews.jobId, jobId));
+    const rows = await db
+        .select({ ...getTableColumns(jobInterviews) })
+        .from(jobInterviews)
+        .innerJoin(jobApplications, eq(jobInterviews.jobId, jobApplications.id))
+        .where(and(...conditions))
+        .orderBy(desc(jobInterviews.createdAt));
     return Response.json(rows);
 }
 
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
         const data = interviewSchema.parse(body);
         const [row] = await db.insert(jobInterviews).values({ jobId: data.jobId, round: data.round, interviewType: data.interviewType, scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null, durationMinutes: data.durationMinutes, location: data.location, meetingUrl: data.meetingUrl, interviewerName: data.interviewerName, interviewerEmail: data.interviewerEmail, notes: data.notes, status: data.status }).returning();
         return Response.json(row, { status: 201 });
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -48,10 +55,10 @@ export async function PUT(req: NextRequest) {
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
         const body = await req.json();
         const data = interviewSchema.parse(body);
-        const [updated] = await db.update(jobInterviews).set({ round: data.round, interviewType: data.interviewType, scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null, durationMinutes: data.durationMinutes, location: data.location, meetingUrl: data.meetingUrl, interviewerName: data.interviewerName, interviewerEmail: data.interviewerEmail, notes: data.notes, status: data.status }).where(eq(jobInterviews.id, id)).returning();
+        const [updated] = await db.update(jobInterviews).set({ round: data.round, interviewType: data.interviewType, scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null, durationMinutes: data.durationMinutes, location: data.location, meetingUrl: data.meetingUrl, interviewerName: data.interviewerName, interviewerEmail: data.interviewerEmail, notes: data.notes, status: data.status }).from(jobApplications).where(and(eq(jobInterviews.id, id), eq(jobInterviews.jobId, jobApplications.id), eq(jobApplications.userId, user.userId))).returning();
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
         return Response.json(updated);
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -60,7 +67,10 @@ export async function DELETE(req: NextRequest) {
     try {
         const id = new URL(req.url).searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
-        await db.delete(jobInterviews).where(eq(jobInterviews.id, id));
+        await db.delete(jobInterviews).where(and(
+            eq(jobInterviews.id, id),
+            inArray(jobInterviews.jobId, db.select({ id: jobApplications.id }).from(jobApplications).where(eq(jobApplications.userId, user.userId)))
+        ));
         return Response.json({ success: true });
     } catch (e) { return Response.json({ error: "Internal server error" }, { status: 500 }); }
 }

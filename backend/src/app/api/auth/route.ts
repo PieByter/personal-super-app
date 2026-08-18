@@ -3,9 +3,16 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { hashPassword, verifyPassword, generateToken } from "@/lib/auth";
 import { loginSchema, registerSchema } from "@/lib/validation";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { eq } from "drizzle-orm";
+import { apiError } from "@/lib/api-error";
 
 export async function POST(req: NextRequest) {
+    const limit = rateLimit(req, { windowMs: 60_000, max: 10 });
+    if (!limit.success) {
+        return rateLimitResponse(limit.retryAfterSeconds ?? 60);
+    }
+
     try {
         const body = await req.json();
         const { action } = body;
@@ -25,7 +32,7 @@ export async function POST(req: NextRequest) {
                     passwordHash,
                     fullName: data.fullName,
                 })
-                .returning({ id: users.id, email: users.email, fullName: users.fullName });
+                .returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role });
 
             const token = generateToken(user.id, user.email, user.role || "user");
             return Response.json({ user: { ...user, role: user.role || "user" }, token });
@@ -52,9 +59,6 @@ export async function POST(req: NextRequest) {
 
         return Response.json({ error: "Invalid action" }, { status: 400 });
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }

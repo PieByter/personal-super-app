@@ -4,6 +4,7 @@ import { financeTransactions, financeCategories } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { transactionSchema } from "@/lib/validation";
 import { eq, and, desc, gte, lte } from "drizzle-orm";
+import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
     const categoryId = searchParams.get("categoryId");
 
     const conditions = [eq(financeTransactions.userId, user.userId)];
-    if (type) conditions.push(eq(financeTransactions.type, type));
+    if (type && (type === "income" || type === "expense")) conditions.push(eq(financeTransactions.type, type));
     if (from) conditions.push(gte(financeTransactions.transactionDate, from));
     if (to) conditions.push(lte(financeTransactions.transactionDate, to));
     if (categoryId) conditions.push(eq(financeTransactions.categoryId, categoryId));
@@ -70,10 +71,7 @@ export async function POST(req: NextRequest) {
 
         return Response.json({ data: transaction }, { status: 201 });
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -101,17 +99,14 @@ export async function PUT(req: NextRequest) {
                 tags: data.tags,
                 updatedAt: new Date(),
             })
-            .where(eq(financeTransactions.id, id))
+            .where(and(eq(financeTransactions.id, id), eq(financeTransactions.userId, user.userId)))
             .returning();
 
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
 
         return Response.json({ data: updated });
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -124,7 +119,7 @@ export async function DELETE(req: NextRequest) {
         const id = searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
 
-        await db.delete(financeTransactions).where(eq(financeTransactions.id, id));
+        await db.delete(financeTransactions).where(and(eq(financeTransactions.id, id), eq(financeTransactions.userId, user.userId)));
 
         return Response.json({ success: true });
     } catch (error) {

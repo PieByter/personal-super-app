@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/transaction.dart';
+import '../../../domain/models/budget.dart';
+import '../../../domain/models/goal.dart';
+import '../../../domain/models/investment.dart';
 import '../../widgets/app_drawer.dart';
 
 class FinanceScreen extends StatefulWidget {
@@ -17,27 +20,120 @@ class _FinanceScreenState extends State<FinanceScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Transaction> _transactions = [];
+  List<Budget> _budgets = [];
+  List<SavingGoal> _goals = [];
+  List<Investment> _investments = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _loadTransactions();
+    _tabController = TabController(length: 4, vsync: this);
+    _loadAll();
+  }
+
+  Future<void> _loadAll() async {
+    setState(() => _isLoading = true);
+    await Future.wait([
+      _loadTransactions(),
+      _loadBudgets(),
+      _loadGoals(),
+      _loadInvestments(),
+    ]);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   Future<void> _loadTransactions() async {
     try {
       final response = await ApiService().get(ApiConstants.transactionsUrl);
-      setState(() {
-        _transactions = (response['data'] as List)
-            .map((e) => Transaction.fromJson(e))
-            .toList();
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _transactions = (response['data'] as List)
+              .map((e) => Transaction.fromJson(e))
+              .toList();
+        });
+      }
+    } catch (_) {
+      // ignore
     }
+  }
+
+  Future<void> _loadBudgets() async {
+    try {
+      final response = await ApiService().get(ApiConstants.budgetsUrl);
+      if (mounted) {
+        setState(() {
+          _budgets = (response as List).map((e) => Budget.fromJson(e)).toList();
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _loadGoals() async {
+    try {
+      final response = await ApiService().get(ApiConstants.goalsUrl);
+      if (mounted) {
+        setState(() {
+          _goals =
+              (response as List).map((e) => SavingGoal.fromJson(e)).toList();
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _loadInvestments() async {
+    try {
+      final response = await ApiService().get(ApiConstants.investmentsUrl);
+      if (mounted) {
+        setState(() {
+          _investments =
+              (response as List).map((e) => Investment.fromJson(e)).toList();
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _delete(String url) async {
+    try {
+      await ApiService().delete(url);
+      await _loadAll();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDelete({
+    required String title,
+    required String url,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete'),
+        content: Text('Delete "$title"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _delete(url);
   }
 
   @override
@@ -51,6 +147,7 @@ class _FinanceScreenState extends State<FinanceScreen>
             Tab(text: 'Transactions', icon: Icon(Icons.receipt_long)),
             Tab(text: 'Budgets', icon: Icon(Icons.pie_chart)),
             Tab(text: 'Goals', icon: Icon(Icons.savings)),
+            Tab(text: 'Investments', icon: Icon(Icons.trending_up)),
           ],
         ),
       ),
@@ -61,13 +158,29 @@ class _FinanceScreenState extends State<FinanceScreen>
           _buildTransactionsTab(),
           _buildBudgetsTab(),
           _buildGoalsTab(),
+          _buildInvestmentsTab(),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddTransactionDialog(),
-        icon: const Icon(Icons.add),
-        label: const Text('Add'),
-      ),
+      floatingActionButton: _buildFab(),
+    );
+  }
+
+  Widget _buildFab() {
+    final index = _tabController.index;
+    final (label, icon, onPressed) = switch (index) {
+      1 => ('Add Budget', Icons.add, () => context.go('/finance/budgets/new')),
+      2 => ('Add Goal', Icons.add, () => context.go('/finance/goals/new')),
+      3 => (
+          'Add Investment',
+          Icons.add,
+          () => context.go('/finance/investments/new')
+        ),
+      _ => ('Add', Icons.add, () => _showAddTransactionDialog()),
+    };
+    return FloatingActionButton.extended(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
     );
   }
 
@@ -175,11 +288,218 @@ class _FinanceScreenState extends State<FinanceScreen>
   }
 
   Widget _buildBudgetsTab() {
-    return const Center(child: Text('Budgets - Coming Soon'));
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_budgets.isEmpty) {
+      return const Center(
+        child: Text('No budgets yet. Tap + to add one.'),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _loadAll,
+      child: ListView.builder(
+        itemCount: _budgets.length,
+        itemBuilder: (context, index) {
+          final b = _budgets[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: AppColors.finance.withValues(alpha: 0.2),
+                child: Icon(Icons.pie_chart, color: AppColors.finance),
+              ),
+              title: Text(
+                '${b.period[0].toUpperCase()}${b.period.substring(1)} Budget',
+              ),
+              subtitle: Text(
+                '${DateFormat('MMM yyyy').format(DateTime.parse(b.startDate))}'
+                '${b.endDate != null ? ' - ${DateFormat('MMM yyyy').format(DateTime.parse(b.endDate!))}' : ''}'
+                ' • ${b.isActive ? 'Active' : 'Inactive'}',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Rp ${NumberFormat('#,###').format(double.parse(b.amount))}',
+                    style: const TextStyle(
+                      color: AppColors.finance,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _confirmDelete(
+                      title: '${b.period} budget',
+                      url: '${ApiConstants.budgetsUrl}/${b.id}',
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => context.go('/finance/budgets/edit', extra: b),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildGoalsTab() {
-    return const Center(child: Text('Saving Goals - Coming Soon'));
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_goals.isEmpty) {
+      return const Center(
+        child: Text('No saving goals yet. Tap + to add one.'),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _loadAll,
+      child: ListView.builder(
+        itemCount: _goals.length,
+        itemBuilder: (context, index) {
+          final g = _goals[index];
+          final target = double.parse(g.targetAmount);
+          final current = double.parse(g.currentAmount);
+          final progress =
+              target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          g.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        onPressed: () => _confirmDelete(
+                          title: g.name,
+                          url: '${ApiConstants.goalsUrl}/${g.id}',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Rp ${NumberFormat('#,###').format(current)} / '
+                    'Rp ${NumberFormat('#,###').format(target)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey.shade200,
+                      color: AppColors.finance,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        '${(progress * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          color: AppColors.finance,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (g.deadline != null)
+                        Text(
+                          'Due ${DateFormat('MMM dd, yyyy').format(DateTime.parse(g.deadline!))}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildInvestmentsTab() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_investments.isEmpty) {
+      return const Center(
+        child: Text('No investments yet. Tap + to add one.'),
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _loadAll,
+      child: ListView.builder(
+        itemCount: _investments.length,
+        itemBuilder: (context, index) {
+          final inv = _investments[index];
+          final qty = double.parse(inv.quantity);
+          final purchase = double.parse(inv.purchasePrice);
+          final current = inv.currentPrice != null
+              ? double.parse(inv.currentPrice!)
+              : purchase;
+          final totalValue = qty * current;
+          final totalCost = qty * purchase;
+          final profit = totalValue - totalCost;
+          final profitPct = totalCost > 0 ? (profit / totalCost) * 100 : 0.0;
+          final isProfit = profit >= 0;
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: AppColors.finance.withValues(alpha: 0.2),
+                child: Icon(Icons.trending_up, color: AppColors.finance),
+              ),
+              title: Text(inv.name),
+              subtitle: Text(
+                '${inv.type}${inv.symbol != null ? ' • ${inv.symbol}' : ''} • '
+                '${DateFormat('MMM dd, yyyy').format(DateTime.parse(inv.purchaseDate))}',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Rp ${NumberFormat('#,###').format(totalValue)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${isProfit ? '+' : ''}${profitPct.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          color: isProfit ? AppColors.finance : AppColors.bugs,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    onPressed: () => _confirmDelete(
+                      title: inv.name,
+                      url: '${ApiConstants.investmentsUrl}/${inv.id}',
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => context.go('/finance/investments/edit', extra: inv),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void _showAddTransactionDialog() {

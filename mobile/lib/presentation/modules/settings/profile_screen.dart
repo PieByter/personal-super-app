@@ -16,6 +16,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _timezoneController = TextEditingController();
   final _currencyController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  bool _isSavingPassword = false;
 
   @override
   void initState() {
@@ -57,6 +60,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SnackBar(content: Text('Error: ${e.toString()}')),
         );
       }
+    }
+  }
+
+  Future<void> _changePassword() async {
+    if (_currentPasswordController.text.isEmpty ||
+        _newPasswordController.text.length < 8) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('New password must be at least 8 characters'),
+          ),
+        );
+      }
+      return;
+    }
+    setState(() => _isSavingPassword = true);
+    try {
+      await ApiService().post('${ApiConstants.baseUrl}/profile/password', {
+        'currentPassword': _currentPasswordController.text,
+        'newPassword': _newPasswordController.text,
+      });
+      if (mounted) {
+        _currentPasswordController.clear();
+        _newPasswordController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Password changed')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingPassword = false);
     }
   }
 
@@ -110,6 +149,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: const Text('Save Profile'),
                     ),
                   ),
+                  const Divider(height: 40),
+                  Text(
+                    'Change Password',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _currentPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Current Password',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _newPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'New Password (min 8 chars)',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: _isSavingPassword ? null : _changePassword,
+                      child: _isSavingPassword
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text('Change Password'),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -121,6 +197,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController.dispose();
     _timezoneController.dispose();
     _currencyController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
     super.dispose();
   }
 }

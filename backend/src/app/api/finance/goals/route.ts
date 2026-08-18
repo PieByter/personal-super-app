@@ -2,8 +2,9 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { financeSavingGoals } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
+import { apiError } from "@/lib/api-error";
 
 const goalSchema = z.object({
     name: z.string().min(1),
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
         const data = goalSchema.parse(body);
         const [row] = await db.insert(financeSavingGoals).values({ userId: user.userId, name: data.name, targetAmount: data.targetAmount.toString(), currentAmount: data.currentAmount?.toString(), deadline: data.deadline, color: data.color, icon: data.icon, isActive: data.isActive }).returning();
         return Response.json(row, { status: 201 });
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -41,10 +42,10 @@ export async function PUT(req: NextRequest) {
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
         const body = await req.json();
         const data = goalSchema.parse(body);
-        const [updated] = await db.update(financeSavingGoals).set({ name: data.name, targetAmount: data.targetAmount.toString(), currentAmount: data.currentAmount?.toString(), deadline: data.deadline, color: data.color, icon: data.icon, isActive: data.isActive, updatedAt: new Date() }).where(eq(financeSavingGoals.id, id)).returning();
+        const [updated] = await db.update(financeSavingGoals).set({ name: data.name, targetAmount: data.targetAmount.toString(), currentAmount: data.currentAmount?.toString(), deadline: data.deadline, color: data.color, icon: data.icon, isActive: data.isActive, updatedAt: new Date() }).where(and(eq(financeSavingGoals.id, id), eq(financeSavingGoals.userId, user.userId))).returning();
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
         return Response.json(updated);
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -53,7 +54,7 @@ export async function DELETE(req: NextRequest) {
     try {
         const id = new URL(req.url).searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
-        await db.delete(financeSavingGoals).where(eq(financeSavingGoals.id, id));
+        await db.delete(financeSavingGoals).where(and(eq(financeSavingGoals.id, id), eq(financeSavingGoals.userId, user.userId)));
         return Response.json({ success: true });
     } catch (e) { return Response.json({ error: "Internal server error" }, { status: 500 }); }
 }

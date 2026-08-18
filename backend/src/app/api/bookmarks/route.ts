@@ -3,7 +3,8 @@ import { db } from "@/db";
 import { bookmarks } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { bookmarkSchema } from "@/lib/validation";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -43,10 +44,7 @@ export async function POST(req: NextRequest) {
 
         return Response.json(entry, { status: 201 });
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -75,17 +73,14 @@ export async function PUT(req: NextRequest) {
                 tags: data.tags,
                 updatedAt: new Date(),
             })
-            .where(eq(bookmarks.id, id))
+            .where(and(eq(bookmarks.id, id), eq(bookmarks.userId, user.userId)))
             .returning();
 
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
 
         return Response.json(updated);
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -98,7 +93,7 @@ export async function DELETE(req: NextRequest) {
         const id = searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
 
-        await db.delete(bookmarks).where(eq(bookmarks.id, id));
+        await db.delete(bookmarks).where(and(eq(bookmarks.id, id), eq(bookmarks.userId, user.userId)));
 
         return Response.json({ success: true });
     } catch (error) {

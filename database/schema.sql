@@ -17,6 +17,7 @@ CREATE TABLE users (
     avatar_url TEXT,
     timezone VARCHAR(50) DEFAULT 'Asia/Jakarta',
     currency VARCHAR(10) DEFAULT 'IDR',
+    role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

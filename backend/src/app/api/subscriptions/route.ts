@@ -3,7 +3,8 @@ import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { subscriptionSchema } from "@/lib/validation";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -46,10 +47,7 @@ export async function POST(req: NextRequest) {
 
         return Response.json(entry, { status: 201 });
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -81,17 +79,14 @@ export async function PUT(req: NextRequest) {
                 reminderDays: data.reminderDays,
                 updatedAt: new Date(),
             })
-            .where(eq(subscriptions.id, id))
+            .where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.userId)))
             .returning();
 
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
 
         return Response.json(updated);
     } catch (error) {
-        if (error instanceof Error) {
-            return Response.json({ error: error.message }, { status: 400 });
-        }
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(error);
     }
 }
 
@@ -104,7 +99,7 @@ export async function DELETE(req: NextRequest) {
         const id = searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
 
-        await db.delete(subscriptions).where(eq(subscriptions.id, id));
+        await db.delete(subscriptions).where(and(eq(subscriptions.id, id), eq(subscriptions.userId, user.userId)));
 
         return Response.json({ success: true });
     } catch (error) {

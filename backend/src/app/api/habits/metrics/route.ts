@@ -3,7 +3,8 @@ import { db } from "@/db";
 import { dailyMetrics } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { dailyMetricSchema } from "@/lib/validation";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
             notes: data.notes,
         }).returning();
         return Response.json(row, { status: 201 });
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function PUT(req: NextRequest) {
@@ -57,10 +58,10 @@ export async function PUT(req: NextRequest) {
             energyLevel: data.energyLevel,
             notes: data.notes,
             updatedAt: new Date(),
-        }).where(eq(dailyMetrics.id, id)).returning();
+        }).where(and(eq(dailyMetrics.id, id), eq(dailyMetrics.userId, user.userId))).returning();
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
         return Response.json(updated);
-    } catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 }); }
+    } catch (e) { return apiError(e); }
 }
 
 export async function DELETE(req: NextRequest) {
@@ -69,7 +70,7 @@ export async function DELETE(req: NextRequest) {
     try {
         const id = new URL(req.url).searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
-        await db.delete(dailyMetrics).where(eq(dailyMetrics.id, id));
+        await db.delete(dailyMetrics).where(and(eq(dailyMetrics.id, id), eq(dailyMetrics.userId, user.userId)));
         return Response.json({ success: true });
     } catch (e) { return Response.json({ error: "Internal server error" }, { status: 500 }); }
 }
