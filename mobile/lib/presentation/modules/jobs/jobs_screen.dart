@@ -51,7 +51,16 @@ class _JobsScreenState extends State<JobsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Job Tracker')),
+      appBar: AppBar(
+        title: const Text('Job Tracker'),
+        actions: [
+          IconButton(
+            tooltip: 'Statistics',
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () => context.go('/jobs/stats'),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(currentRoute: '/jobs'),
       body: RefreshIndicator(
         onRefresh: _loadEntries,

@@ -13,6 +13,7 @@ import '../presentation/modules/finance/goal_form_screen.dart';
 import '../presentation/modules/finance/investment_form_screen.dart';
 import '../presentation/modules/finance/recurring_form_screen.dart';
 import '../presentation/modules/finance/finance_category_form_screen.dart';
+import '../presentation/modules/finance/budget_utilization_screen.dart';
 import '../presentation/modules/journal/journal_screen.dart';
 import '../presentation/modules/journal/journal_entry_form_screen.dart';
 import '../presentation/modules/journal/journal_tags_screen.dart';
@@ -22,6 +23,7 @@ import '../presentation/modules/jobs/jobs_screen.dart';
 import '../presentation/modules/jobs/job_form_screen.dart';
 import '../presentation/modules/jobs/job_contacts_screen.dart';
 import '../presentation/modules/jobs/job_interviews_screen.dart';
+import '../presentation/modules/jobs/job_stats_screen.dart';
 import '../presentation/modules/projects/projects_screen.dart';
 import '../presentation/modules/projects/project_form_screen.dart';
 import '../presentation/modules/projects/project_tasks_screen.dart';
@@ -30,6 +32,7 @@ import '../presentation/modules/habits/habits_screen.dart';
 import '../presentation/modules/habits/habit_form_screen.dart';
 import '../presentation/modules/habits/habit_logs_screen.dart';
 import '../presentation/modules/habits/daily_metrics_screen.dart';
+import '../presentation/modules/habits/habit_stats_screen.dart';
 import '../presentation/modules/subscriptions/subscriptions_screen.dart';
 import '../presentation/modules/subscriptions/subscription_form_screen.dart';
 import '../presentation/modules/subscriptions/subscription_payments_screen.dart';
@@ -158,6 +161,10 @@ class AppRouter {
         builder: (context, state) => const FinanceCategoryFormScreen(),
       ),
       GoRoute(
+        path: '/finance/budget-utilization',
+        builder: (context, state) => const BudgetUtilizationScreen(),
+      ),
+      GoRoute(
         path: '/journal',
         builder: (context, state) => const JournalScreen(),
       ),
@@ -210,6 +217,10 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/jobs/stats',
+        builder: (context, state) => const JobStatsScreen(),
+      ),
+      GoRoute(
         path: '/projects',
         builder: (context, state) => const ProjectsScreen(),
       ),
@@ -258,6 +269,10 @@ class AppRouter {
       GoRoute(
         path: '/habits/metrics',
         builder: (context, state) => const DailyMetricsScreen(),
+      ),
+      GoRoute(
+        path: '/habits/stats',
+        builder: (context, state) => const HabitStatsScreen(),
       ),
       GoRoute(
         path: '/subscriptions',

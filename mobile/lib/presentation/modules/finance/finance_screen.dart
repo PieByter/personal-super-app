@@ -186,6 +186,11 @@ class _FinanceScreenState extends State<FinanceScreen>
         title: const Text('Finance'),
         actions: [
           IconButton(
+            tooltip: 'Budget Utilization',
+            icon: const Icon(Icons.speed),
+            onPressed: () => context.go('/finance/budget-utilization'),
+          ),
+          IconButton(
             tooltip: 'Import CSV',
             icon: const Icon(Icons.upload_file),
             onPressed: _showImportCsvDialog,

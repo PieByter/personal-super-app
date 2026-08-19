@@ -50,6 +50,11 @@ class _HabitsScreenState extends State<HabitsScreen> {
             icon: const Icon(Icons.insights),
             onPressed: () => context.go('/habits/metrics'),
           ),
+          IconButton(
+            tooltip: 'Streaks',
+            icon: const Icon(Icons.local_fire_department),
+            onPressed: () => context.go('/habits/stats'),
+          ),
         ],
       ),
       drawer: const AppDrawer(currentRoute: '/habits'),

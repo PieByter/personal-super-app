@@ -16,11 +16,15 @@ class ApiConstants {
   static const String journalUrl = '$baseUrl/journal';
   static const String bugsUrl = '$baseUrl/bugs';
   static const String jobsUrl = '$baseUrl/jobs';
+  static const String jobsStatsUrl = '$baseUrl/jobs/stats';
   static const String projectsUrl = '$baseUrl/projects';
   static const String habitsUrl = '$baseUrl/habits';
+  static const String habitsStatsUrl = '$baseUrl/habits/stats';
   static const String subscriptionsUrl = '$baseUrl/subscriptions';
   static const String inventoryUrl = '$baseUrl/inventory';
   static const String bookmarksUrl = '$baseUrl/bookmarks';
+  static const String budgetUtilizationUrl =
+      '$baseUrl/finance/budgets/utilization';
 }
 
 class StorageKeys {
@@ -29,7 +33,9 @@ class StorageKeys {
   static const String user = 'user_data';
   static const String theme = 'app_theme';
   static const String themeMode = 'theme_mode';
+  static const String accentColor = 'accent_color';
   static const String biometricEnabled = 'biometric_enabled';
+  static const String locale = 'app_locale';
 }
 
 class AppColors {

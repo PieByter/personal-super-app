@@ -4,6 +4,8 @@ import 'app.dart';
 import 'core/router.dart';
 import 'data/api_service.dart';
 import 'data/theme_service.dart';
+import 'data/app_localizations.dart';
+import 'data/pwa_install_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,8 +17,14 @@ void main() {
   // Restore persisted theme preference before the app builds.
   ThemeService().init();
 
+  // Restore persisted language preference.
+  LocaleService().init();
+
   // Load stored tokens from secure storage.
   ApiService().init();
+
+  // Detect PWA install availability (web only).
+  PwaInstallService().init();
 
   // When the API returns 401 (expired/invalid token), clear the session
   // and redirect the user to the login screen.

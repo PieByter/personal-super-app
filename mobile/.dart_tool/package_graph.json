@@ -18,6 +18,7 @@
         "flutter",
         "flutter_bloc",
         "flutter_local_notifications",
+        "flutter_localizations",
         "flutter_secure_storage",
         "flutter_slidable",
         "flutter_typeahead",
@@ -36,7 +37,8 @@
         "sqflite",
         "table_calendar",
         "timezone",
-        "url_launcher"
+        "url_launcher",
+        "web"
       ],
       "devDependencies": [
         "flutter_lints",
@@ -67,6 +69,11 @@
         "test_api",
         "vector_math"
       ]
+    },
+    {
+      "name": "web",
+      "version": "1.1.1",
+      "dependencies": []
     },
     {
       "name": "multi_select_flutter",
@@ -281,7 +288,7 @@
     },
     {
       "name": "table_calendar",
-      "version": "3.1.3",
+      "version": "3.2.1",
       "dependencies": [
         "flutter",
         "intl",
@@ -298,7 +305,7 @@
     },
     {
       "name": "intl",
-      "version": "0.19.0",
+      "version": "0.20.2",
       "dependencies": [
         "clock",
         "meta",
@@ -360,6 +367,15 @@
       "name": "cupertino_icons",
       "version": "1.0.9",
       "dependencies": []
+    },
+    {
+      "name": "flutter_localizations",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter",
+        "intl",
+        "path"
+      ]
     },
     {
       "name": "flutter",
@@ -528,11 +544,6 @@
       "dependencies": [
         "dbus"
       ]
-    },
-    {
-      "name": "web",
-      "version": "1.1.1",
-      "dependencies": []
     },
     {
       "name": "connectivity_plus_platform_interface",

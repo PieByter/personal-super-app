@@ -123,6 +123,12 @@ vercel --prod
 - ✅ **Recurring transaction automation** (rules + process due)
 - ✅ **CSV import** for bank statements
 - ✅ **Investment price tracking** (Yahoo Finance refresh)
+- ✅ **Job Tracker statistics** (response/interview/offer rate)
+- ✅ **Budget utilization alerts** (warning/exceeded status)
+- ✅ **Habit streaks & heatmap** (90-day view)
+- ✅ **Custom accent color** (8 theme colors)
+- ✅ **Multi-language** (English / Bahasa Indonesia)
+- ✅ **PWA install** (web)
 - ✅ Dark mode support
 - ✅ Biometric lock (Android/iOS)
 - ✅ Dashboard with aggregated metrics
@@ -134,6 +140,7 @@ vercel --prod
 
 ## Roadmap
 
-- [ ] Push notifications for reminders
-- [ ] Offline sync (SQLite)
+- [ ] Push notifications for reminders (needs Android/iOS platform)
+- [ ] Offline sync (SQLite) (needs Android/iOS platform)
 - [ ] Recurring transaction automation (scheduled cron)
+- [ ] Home screen widget (needs Android platform)
