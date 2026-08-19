@@ -72,10 +72,22 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              trailing: Text(
-                                'Rp ${entry.amount}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Rp ${entry.amount}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Payments',
+                                    icon: const Icon(Icons.payment),
+                                    onPressed: () => context.go(
+                                        '/subscriptions/payments',
+                                        extra: entry),
+                                  ),
+                                ],
                               ),
                               onTap: () => context.go('/subscriptions/edit',
                                   extra: entry),

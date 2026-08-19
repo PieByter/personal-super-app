@@ -42,7 +42,16 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bookmark Manager')),
+      appBar: AppBar(
+        title: const Text('Bookmark Manager'),
+        actions: [
+          IconButton(
+            tooltip: 'Collections',
+            icon: const Icon(Icons.folder_outlined),
+            onPressed: () => context.go('/bookmarks/collections'),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(currentRoute: '/bookmarks'),
       body: RefreshIndicator(
         onRefresh: _loadEntries,

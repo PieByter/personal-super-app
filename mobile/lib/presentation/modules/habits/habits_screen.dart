@@ -42,7 +42,16 @@ class _HabitsScreenState extends State<HabitsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Habit Tracker')),
+      appBar: AppBar(
+        title: const Text('Habit Tracker'),
+        actions: [
+          IconButton(
+            tooltip: 'Daily Metrics',
+            icon: const Icon(Icons.insights),
+            onPressed: () => context.go('/habits/metrics'),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(currentRoute: '/habits'),
       body: RefreshIndicator(
         onRefresh: _loadEntries,
@@ -72,11 +81,26 @@ class _HabitsScreenState extends State<HabitsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              trailing: entry.isActive
-                                  ? const Icon(Icons.notifications_active,
-                                      color: Colors.green)
-                                  : const Icon(Icons.notifications_off,
-                                      color: Colors.grey),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  entry.isActive
+                                      ? const Icon(
+                                          Icons.notifications_active,
+                                          color: Colors.green,
+                                        )
+                                      : const Icon(
+                                          Icons.notifications_off,
+                                          color: Colors.grey,
+                                        ),
+                                  IconButton(
+                                    tooltip: 'Logs',
+                                    icon: const Icon(Icons.history),
+                                    onPressed: () => context.go('/habits/logs',
+                                        extra: entry),
+                                  ),
+                                ],
+                              ),
                               onTap: () =>
                                   context.go('/habits/edit', extra: entry),
                             ),

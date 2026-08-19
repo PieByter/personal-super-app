@@ -109,21 +109,27 @@ vercel --prod
 ## Features
 
 - ✅ JWT Authentication
-- ✅ Row Level Security (RLS) ready for Supabase
-- ✅ Offline-first with SQLite sync
-- ✅ Comprehensive database schema with indexes
+- ✅ Rate limiting on `/api/auth` (brute-force protection)
+- ✅ User-scoped CRUD security (IDOR protection on all endpoints)
+- ✅ Profile & change password endpoints
+- ✅ Data export (JSON/CSV) via `/api/export`
+- ✅ CORS support for Flutter web
+- ✅ 401 auto-logout on token expiry
+- ✅ Dark mode support
+- ✅ Biometric lock (Android/iOS)
 - ✅ Dashboard with aggregated metrics
+- ✅ Comprehensive database schema with indexes
 - ✅ Modular architecture for easy extension
-- ✅ Type-safe API with Zod validation
-- ✅ Clean Architecture in Flutter
+- ✅ Type-safe API with Zod validation + sanitized error responses
+- ✅ Unit tests (backend: vitest, mobile: flutter_test)
+- ✅ CI/CD with GitHub Actions
 
 ## Roadmap
 
 - [ ] CSV import for bank statements
 - [ ] Push notifications for reminders
-- [ ] Biometric authentication
-- [ ] Data export (JSON/CSV)
-- [ ] Dark mode support
+- [ ] Offline sync (SQLite)
 - [ ] Charts & visualizations
 - [ ] Recurring transaction automation
 - [ ] Investment price tracking
+- [ ] Pagination on list endpoints

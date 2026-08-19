@@ -26,6 +26,8 @@ class StorageKeys {
   static const String token = 'auth_token';
   static const String user = 'user_data';
   static const String theme = 'app_theme';
+  static const String themeMode = 'theme_mode';
+  static const String biometricEnabled = 'biometric_enabled';
 }
 
 class AppColors {

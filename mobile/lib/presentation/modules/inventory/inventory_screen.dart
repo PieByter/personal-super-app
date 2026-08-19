@@ -42,7 +42,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Personal Inventory')),
+      appBar: AppBar(
+        title: const Text('Personal Inventory'),
+        actions: [
+          IconButton(
+            tooltip: 'Categories',
+            icon: const Icon(Icons.category_outlined),
+            onPressed: () => context.go('/inventory/categories'),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(currentRoute: '/inventory'),
       body: RefreshIndicator(
         onRefresh: _loadEntries,

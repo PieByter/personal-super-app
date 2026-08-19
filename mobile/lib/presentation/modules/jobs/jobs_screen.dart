@@ -81,9 +81,25 @@ class _JobsScreenState extends State<JobsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              trailing: entry.isFavorite
-                                  ? const Icon(Icons.star, color: Colors.amber)
-                                  : null,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (entry.isFavorite)
+                                    const Icon(Icons.star, color: Colors.amber),
+                                  IconButton(
+                                    tooltip: 'Interviews',
+                                    icon: const Icon(Icons.event_note),
+                                    onPressed: () => context
+                                        .go('/jobs/interviews', extra: entry),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Contacts',
+                                    icon: const Icon(Icons.people_outline),
+                                    onPressed: () => context
+                                        .go('/jobs/contacts', extra: entry),
+                                  ),
+                                ],
+                              ),
                               onTap: () =>
                                   context.go('/jobs/edit', extra: entry),
                             ),

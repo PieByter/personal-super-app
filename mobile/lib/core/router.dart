@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'constants.dart';
 import '../presentation/modules/auth/login_screen.dart';
+import '../presentation/modules/auth/lock_screen.dart';
 import '../presentation/modules/dashboard/dashboard_screen.dart';
 import '../presentation/modules/finance/finance_screen.dart';
 import '../presentation/modules/finance/transaction_form_screen.dart';
@@ -57,8 +60,38 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/login',
+    redirect: (context, state) async {
+      final prefs = await SharedPreferences.getInstance();
+      final hasToken = prefs.getString(StorageKeys.token) != null;
+      final biometricEnabled =
+          prefs.getBool(StorageKeys.biometricEnabled) ?? false;
+      final isAuthRoute =
+          state.matchedLocation == '/login' || state.matchedLocation == '/lock';
+
+      if (!hasToken) {
+        // Not logged in: only allow auth routes.
+        return isAuthRoute ? null : '/login';
+      }
+
+      // Logged in: stay on the lock screen until the user authenticates.
+      if (state.matchedLocation == '/lock') {
+        return null;
+      }
+
+      // Logged in: if biometric is enabled, require unlock first.
+      if (biometricEnabled) {
+        return '/lock';
+      }
+
+      // Logged in without biometric: skip login/lock.
+      if (state.matchedLocation == '/login') {
+        return '/dashboard';
+      }
+      return null;
+    },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/lock', builder: (context, state) => const LockScreen()),
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),

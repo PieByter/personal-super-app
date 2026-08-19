@@ -42,7 +42,16 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Developer Journal')),
+      appBar: AppBar(
+        title: const Text('Developer Journal'),
+        actions: [
+          IconButton(
+            tooltip: 'Tags',
+            icon: const Icon(Icons.label_outline),
+            onPressed: () => context.go('/journal/tags'),
+          ),
+        ],
+      ),
       drawer: const AppDrawer(currentRoute: '/journal'),
       body: RefreshIndicator(
         onRefresh: _loadEntries,

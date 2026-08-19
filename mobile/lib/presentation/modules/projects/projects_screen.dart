@@ -81,9 +81,26 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              trailing: entry.progress != null
-                                  ? Text('${entry.progress}%')
-                                  : null,
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (entry.progress != null)
+                                    Text('${entry.progress}%'),
+                                  IconButton(
+                                    tooltip: 'Tasks',
+                                    icon: const Icon(Icons.checklist),
+                                    onPressed: () => context
+                                        .go('/projects/tasks', extra: entry),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Milestones',
+                                    icon: const Icon(Icons.flag_outlined),
+                                    onPressed: () => context.go(
+                                        '/projects/milestones',
+                                        extra: entry),
+                                  ),
+                                ],
+                              ),
                               onTap: () =>
                                   context.go('/projects/edit', extra: entry),
                             ),
