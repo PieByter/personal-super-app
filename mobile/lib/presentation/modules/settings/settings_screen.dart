@@ -111,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _signOut() async {
-    await ApiService().clearToken();
+    await ApiService().clearTokens();
     if (mounted) context.go('/login');
   }
 }

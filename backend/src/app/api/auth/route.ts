@@ -1,11 +1,25 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { hashPassword, verifyPassword, generateToken } from "@/lib/auth";
+import { users, refreshTokens } from "@/db/schema";
+import { hashPassword, verifyPassword, generateAccessToken, generateRefreshToken } from "@/lib/auth";
 import { loginSchema, registerSchema } from "@/lib/validation";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { eq } from "drizzle-orm";
 import { apiError } from "@/lib/api-error";
+
+const REFRESH_TOKEN_DAYS = 30;
+
+async function issueTokens(userId: string, email: string, role: string) {
+    const accessToken = generateAccessToken(userId, email, role);
+    const refreshToken = generateRefreshToken();
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_DAYS * 24 * 60 * 60 * 1000);
+    await db.insert(refreshTokens).values({
+        userId,
+        token: refreshToken,
+        expiresAt,
+    });
+    return { accessToken, refreshToken, expiresAt };
+}
 
 export async function POST(req: NextRequest) {
     const limit = rateLimit(req, { windowMs: 60_000, max: 10 });
@@ -34,8 +48,13 @@ export async function POST(req: NextRequest) {
                 })
                 .returning({ id: users.id, email: users.email, fullName: users.fullName, role: users.role });
 
-            const token = generateToken(user.id, user.email, user.role || "user");
-            return Response.json({ user: { ...user, role: user.role || "user" }, token });
+            const role = user.role || "user";
+            const tokens = await issueTokens(user.id, user.email, role);
+            return Response.json({
+                user: { ...user, role },
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+            });
         }
 
         if (action === "login") {
@@ -50,10 +69,12 @@ export async function POST(req: NextRequest) {
                 return Response.json({ error: "Invalid credentials" }, { status: 401 });
             }
 
-            const token = generateToken(user.id, user.email, user.role || "user");
+            const role = user.role || "user";
+            const tokens = await issueTokens(user.id, user.email, role);
             return Response.json({
-                user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role || "user" },
-                token,
+                user: { id: user.id, email: user.email, fullName: user.fullName, role },
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
             });
         }
 

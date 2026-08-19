@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { s, statCardStyle } from "@/lib/admin-styles";
+import { adminFetch } from "@/lib/admin-fetch";
 
 interface ReportData {
   label: string;
@@ -31,7 +32,7 @@ export default function AdminReportsPage() {
   async function fetchStats() {
     try {
       const token = localStorage.getItem("admin_token") || "";
-      const res = await fetch("/api/dashboard", {
+      const res = await adminFetch("/api/dashboard", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 401 || res.status === 403) {

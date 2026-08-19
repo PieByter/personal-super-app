@@ -143,7 +143,7 @@ class AppDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout),
             title: const Text('Sign Out'),
             onTap: () async {
-              await ApiService().clearToken();
+              await ApiService().clearTokens();
               if (context.mounted) context.go('/login');
             },
           ),

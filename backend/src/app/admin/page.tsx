@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { s, statCardStyle, btnStyle } from "@/lib/admin-styles";
+import { adminFetch, clearAdminSession } from "@/lib/admin-fetch";
 
 interface SystemStats {
   totalUsers: number;
@@ -30,12 +31,12 @@ export default function AdminDashboard() {
 
   async function fetchDashboard(authToken: string) {
     try {
-      const res = await fetch("/api/dashboard", {
+      const res = await adminFetch("/api/dashboard", {
         headers: { Authorization: `Bearer ${authToken}` },
       });
       if (!res.ok) {
         if (res.status === 401) {
-          localStorage.removeItem("admin_token");
+          clearAdminSession();
           window.location.href = "/admin";
           return;
         }

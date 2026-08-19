@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { s, badgeStyle, btnStyle } from "@/lib/admin-styles";
+import { adminFetch, getAdminToken } from "@/lib/admin-fetch";
 
 interface UserRecord {
   id: string;
@@ -24,13 +25,13 @@ export default function AdminUsersPage() {
   }, []);
 
   function getToken() {
-    return localStorage.getItem("admin_token") || "";
+    return getAdminToken();
   }
 
   async function fetchUsers() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/users", {
+      const res = await adminFetch("/api/admin/users", {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (res.status === 401 || res.status === 403) {
@@ -51,7 +52,7 @@ export default function AdminUsersPage() {
   async function handleDelete(id: string, email: string) {
     if (!confirm(`Delete user "${email}"? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/admin/users?id=${id}`, {
+      const res = await adminFetch(`/api/admin/users?id=${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${getToken()}` },
       });
@@ -64,7 +65,7 @@ export default function AdminUsersPage() {
 
   async function handleUpdateRole(id: string, role: string) {
     try {
-      const res = await fetch(`/api/admin/users?id=${id}`, {
+      const res = await adminFetch(`/api/admin/users?id=${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -186,8 +187,8 @@ function EditUserModal({
   async function handleSave() {
     setSaving(true);
     try {
-      const token = localStorage.getItem("admin_token") || "";
-      const res = await fetch(`/api/admin/users?id=${user.id}`, {
+      const token = getAdminToken();
+      const res = await adminFetch(`/api/admin/users?id=${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

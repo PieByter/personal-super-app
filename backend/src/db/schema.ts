@@ -30,6 +30,24 @@ export const users = pgTable("users", {
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+export const refreshTokens = pgTable("refresh_tokens", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    token: varchar("token", { length: 512 }).notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const passwordResets = pgTable("password_resets", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    token: varchar("token", { length: 512 }).notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 // Finance
 export const financeCategories = pgTable("finance_categories", {
     id: uuid("id").primaryKey().defaultRandom(),

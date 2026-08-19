@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { s, sidebarLinkStyle, btnStyle } from "@/lib/admin-styles";
+import { setAdminSession, clearAdminSession } from "@/lib/admin-fetch";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: "📊" },
@@ -28,7 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   function handleLogout() {
-    localStorage.removeItem("admin_token");
+    clearAdminSession();
     setAuthenticated(false);
     router.push("/admin");
   }
@@ -45,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         body: JSON.stringify({ action: "login", email, password }),
       });
       const json = await res.json();
-      if (json.token) {
-        localStorage.setItem("admin_token", json.token);
+      if (json.accessToken) {
+        setAdminSession(json.accessToken, json.refreshToken || "");
         setAuthenticated(true);
         setLoginError(null);
       } else {

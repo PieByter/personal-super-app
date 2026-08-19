@@ -3,19 +3,32 @@ import { db } from "@/db";
 import { habits } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { habitSchema } from "@/lib/validation";
-import { eq, and, desc } from "drizzle-orm";
+import { getPagination, paginateResponse } from "@/lib/pagination";
+import { eq, and, desc, count } from "drizzle-orm";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
     if (!user) return unauthorizedResponse();
 
-    const entries = await db
+    const pagination = getPagination(req);
+    const baseQuery = db
         .select()
         .from(habits)
         .where(eq(habits.userId, user.userId))
         .orderBy(desc(habits.createdAt));
 
+    if (pagination.enabled) {
+        const [totalRow] = await db
+            .select({ value: count() })
+            .from(habits)
+            .where(eq(habits.userId, user.userId));
+        const total = totalRow?.value ?? 0;
+        const rows = await baseQuery.limit(pagination.pageSize).offset(pagination.offset);
+        return Response.json(paginateResponse(rows, total, pagination));
+    }
+
+    const entries = await baseQuery;
     return Response.json(entries);
 }
 

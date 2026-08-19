@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { NextRequest } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key-change-in-production";
@@ -18,6 +19,21 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
+}
+
+/**
+ * Short-lived access token (15 minutes).
+ * Used in the Authorization header for every API request.
+ */
+export function generateAccessToken(userId: string, email: string, role: string = "user"): string {
+    return jwt.sign({ userId, email, role }, JWT_SECRET, { expiresIn: "15m" });
+}
+
+/**
+ * Opaque refresh token (30 days). Stored in the DB so it can be revoked.
+ */
+export function generateRefreshToken(): string {
+    return randomBytes(48).toString("hex");
 }
 
 export function generateToken(userId: string, email: string, role: string = "user"): string {

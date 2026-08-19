@@ -15,6 +15,9 @@ void main() {
   // Restore persisted theme preference before the app builds.
   ThemeService().init();
 
+  // Load stored tokens from secure storage.
+  ApiService().init();
+
   // When the API returns 401 (expired/invalid token), clear the session
   // and redirect the user to the login screen.
   ApiService().onUnauthorized = () {

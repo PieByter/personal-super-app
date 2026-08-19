@@ -3,7 +3,8 @@ import { db } from "@/db";
 import { financeTransactions, financeCategories } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { transactionSchema } from "@/lib/validation";
-import { eq, and, desc, gte, lte } from "drizzle-orm";
+import { getPagination, paginateResponse } from "@/lib/pagination";
+import { eq, and, desc, gte, lte, count } from "drizzle-orm";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
     const from = searchParams.get("from");
     const to = searchParams.get("to");
     const categoryId = searchParams.get("categoryId");
+    const pagination = getPagination(req);
 
     const conditions = [eq(financeTransactions.userId, user.userId)];
     if (type && (type === "income" || type === "expense")) conditions.push(eq(financeTransactions.type, type));
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest) {
     if (to) conditions.push(lte(financeTransactions.transactionDate, to));
     if (categoryId) conditions.push(eq(financeTransactions.categoryId, categoryId));
 
-    const transactions = await db
+    const baseQuery = db
         .select({
             id: financeTransactions.id,
             amount: financeTransactions.amount,
@@ -44,6 +46,17 @@ export async function GET(req: NextRequest) {
         .where(and(...conditions))
         .orderBy(desc(financeTransactions.transactionDate));
 
+    if (pagination.enabled) {
+        const [totalRow] = await db
+            .select({ value: count() })
+            .from(financeTransactions)
+            .where(and(...conditions));
+        const total = totalRow?.value ?? 0;
+        const rows = await baseQuery.limit(pagination.pageSize).offset(pagination.offset);
+        return Response.json(paginateResponse(rows, total, pagination));
+    }
+
+    const transactions = await baseQuery;
     return Response.json({ data: transactions });
 }
 

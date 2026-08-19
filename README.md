@@ -108,13 +108,17 @@ vercel --prod
 
 ## Features
 
-- ✅ JWT Authentication
+- ✅ JWT Authentication with **refresh token rotation** (15m access + 30d refresh, revocable)
 - ✅ Rate limiting on `/api/auth` (brute-force protection)
 - ✅ User-scoped CRUD security (IDOR protection on all endpoints)
 - ✅ Profile & change password endpoints
+- ✅ **Forgot / reset password** flow
+- ✅ **Secure token storage** (flutter_secure_storage)
 - ✅ Data export (JSON/CSV) via `/api/export`
 - ✅ CORS support for Flutter web
-- ✅ 401 auto-logout on token expiry
+- ✅ 401 auto-refresh + auto-logout on token expiry
+- ✅ **Pagination** on list endpoints (`?page=1&pageSize=20`)
+- ✅ **Admin bootstrap** endpoint (first user becomes admin)
 - ✅ Dark mode support
 - ✅ Biometric lock (Android/iOS)
 - ✅ Dashboard with aggregated metrics
@@ -132,4 +136,3 @@ vercel --prod
 - [ ] Charts & visualizations
 - [ ] Recurring transaction automation
 - [ ] Investment price tracking
-- [ ] Pagination on list endpoints

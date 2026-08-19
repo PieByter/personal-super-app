@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants.dart';
+import '../data/api_service.dart';
 import '../presentation/modules/auth/login_screen.dart';
 import '../presentation/modules/auth/lock_screen.dart';
 import '../presentation/modules/dashboard/dashboard_screen.dart';
@@ -62,7 +63,7 @@ class AppRouter {
     initialLocation: '/login',
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
-      final hasToken = prefs.getString(StorageKeys.token) != null;
+      final hasToken = await ApiService().isLoggedIn();
       final biometricEnabled =
           prefs.getBool(StorageKeys.biometricEnabled) ?? false;
       final isAuthRoute =
