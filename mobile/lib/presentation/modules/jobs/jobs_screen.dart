@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/job.dart';
 import '../../widgets/app_drawer.dart';
+import '../../widgets/shimmer_list.dart';
 
 class JobsScreen extends StatefulWidget {
   const JobsScreen({super.key});
@@ -65,7 +67,7 @@ class _JobsScreenState extends State<JobsScreen> {
       body: RefreshIndicator(
         onRefresh: _loadEntries,
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const ShimmerList()
             : _error != null
                 ? Center(child: Text('Error: $_error'))
                 : _entries.isEmpty
@@ -95,6 +97,13 @@ class _JobsScreenState extends State<JobsScreen> {
                                 children: [
                                   if (entry.isFavorite)
                                     const Icon(Icons.star, color: Colors.amber),
+                                  if (entry.url != null &&
+                                      entry.url!.isNotEmpty)
+                                    IconButton(
+                                      tooltip: 'Open posting',
+                                      icon: const Icon(Icons.open_in_new),
+                                      onPressed: () => _openUrl(entry.url!),
+                                    ),
                                   IconButton(
                                     tooltip: 'Interviews',
                                     icon: const Icon(Icons.event_note),
@@ -122,5 +131,19 @@ class _JobsScreenState extends State<JobsScreen> {
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    final ok = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open link')),
+      );
+    }
   }
 }

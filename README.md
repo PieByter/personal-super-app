@@ -105,6 +105,7 @@ vercel --prod
 
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - Random secret for token signing
+- `CRON_SECRET` - Secret for the scheduled cron endpoint
 
 ## Features
 
@@ -120,7 +121,7 @@ vercel --prod
 - ✅ **Pagination** on list endpoints (`?page=1&pageSize=20`)
 - ✅ **Admin bootstrap** endpoint (first user becomes admin)
 - ✅ **Charts & visualizations** (spending pie chart, income/expense bar chart)
-- ✅ **Recurring transaction automation** (rules + process due)
+- ✅ **Recurring transaction automation** (rules + process due + **scheduled cron**)
 - ✅ **CSV import** for bank statements
 - ✅ **Investment price tracking** (Yahoo Finance refresh)
 - ✅ **Job Tracker statistics** (response/interview/offer rate)
@@ -129,6 +130,10 @@ vercel --prod
 - ✅ **Custom accent color** (8 theme colors)
 - ✅ **Multi-language** (English / Bahasa Indonesia)
 - ✅ **PWA install** (web)
+- ✅ **Search & filter** in Finance, Journal, Bookmarks
+- ✅ **Swipe actions** (edit/delete) in Finance
+- ✅ **Shimmer loading** states
+- ✅ **Open links** (bookmarks, job postings)
 - ✅ Dark mode support
 - ✅ Biometric lock (Android/iOS)
 - ✅ Dashboard with aggregated metrics
@@ -142,5 +147,8 @@ vercel --prod
 
 - [ ] Push notifications for reminders (needs Android/iOS platform)
 - [ ] Offline sync (SQLite) (needs Android/iOS platform)
-- [ ] Recurring transaction automation (scheduled cron)
+- [ ] Home screen widget (needs Android platform)
+- [ ] Photo upload for inventory items / avatar (image_picker)
+- [ ] Calendar view for habits & journal (table_calendar)
+- [ ] Offline detection banner (connectivity_plus)
 - [ ] Home screen widget (needs Android platform)

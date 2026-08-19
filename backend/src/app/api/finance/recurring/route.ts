@@ -127,23 +127,24 @@ export async function DELETE(req: NextRequest) {
 }
 
 /**
- * Processes all due recurring rules for the current user and generates
- * transactions. Advances nextExecution by the rule's frequency/interval.
+ * Processes all due recurring rules and generates transactions.
+ * Pass a userId to process only that user; pass null to process everyone
+ * (used by the scheduled cron).
  */
-export async function processDueRules(userId: string) {
+export async function processDueRules(userId: string | null) {
     const now = new Date();
     const today = now.toISOString().split("T")[0];
+
+    const conditions = [
+        eq(financeRecurringRules.isActive, true),
+        lte(financeRecurringRules.nextExecution, today),
+    ];
+    if (userId) conditions.push(eq(financeRecurringRules.userId, userId));
 
     const dueRules = await db
         .select()
         .from(financeRecurringRules)
-        .where(
-            and(
-                eq(financeRecurringRules.userId, userId),
-                eq(financeRecurringRules.isActive, true),
-                lte(financeRecurringRules.nextExecution, today)
-            )
-        );
+        .where(and(...conditions));
 
     const created: typeof financeTransactions.$inferSelect[] = [];
 
@@ -160,7 +161,7 @@ export async function processDueRules(userId: string) {
         const [tx] = await db
             .insert(financeTransactions)
             .values({
-                userId,
+                userId: rule.userId,
                 categoryId: rule.categoryId,
                 amount: rule.amount,
                 type: rule.type,

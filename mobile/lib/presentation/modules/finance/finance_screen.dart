@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/transaction.dart';
@@ -10,6 +11,7 @@ import '../../../domain/models/investment.dart';
 import '../../../domain/models/recurring_rule.dart';
 import '../../widgets/app_drawer.dart';
 import '../../widgets/expense_category_chart.dart';
+import '../../widgets/shimmer_list.dart';
 
 class FinanceScreen extends StatefulWidget {
   const FinanceScreen({super.key});
@@ -27,12 +29,21 @@ class _FinanceScreenState extends State<FinanceScreen>
   List<Investment> _investments = [];
   List<RecurringRule> _recurring = [];
   bool _isLoading = true;
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _loadAll();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAll() async {
@@ -247,12 +258,20 @@ class _FinanceScreenState extends State<FinanceScreen>
   }
 
   Widget _buildTransactionsTab() {
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) return const ShimmerList();
     if (_transactions.isEmpty) {
       return const Center(
         child: Text('No transactions yet. Tap + to add one.'),
       );
     }
+
+    final filtered = _searchQuery.isEmpty
+        ? _transactions
+        : _transactions.where((t) {
+            final q = _searchQuery.toLowerCase();
+            return (t.description?.toLowerCase().contains(q) ?? false) ||
+                (t.category?.name?.toLowerCase().contains(q) ?? false);
+          }).toList();
 
     final income = _transactions
         .where((t) => t.type == 'income')
@@ -263,6 +282,27 @@ class _FinanceScreenState extends State<FinanceScreen>
 
     return Column(
       children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (v) => setState(() => _searchQuery = v),
+            decoration: InputDecoration(
+              hintText: 'Search transactions...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    ),
+              isDense: true,
+            ),
+          ),
+        ),
         Card(
           margin: const EdgeInsets.all(16),
           child: Padding(
@@ -291,44 +331,89 @@ class _FinanceScreenState extends State<FinanceScreen>
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadAll,
-            child: ListView(
-              children: [
-                ExpenseCategoryChart(transactions: _transactions),
-                ..._transactions.map((t) {
-                  final isIncome = t.type == 'income';
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: isIncome
-                            ? AppColors.finance.withValues(alpha: 0.2)
-                            : AppColors.bugs.withValues(alpha: 0.2),
-                        child: Icon(
-                          isIncome ? Icons.arrow_upward : Icons.arrow_downward,
-                          color: isIncome ? AppColors.finance : AppColors.bugs,
-                        ),
-                      ),
-                      title: Text(t.description ?? 'No description'),
-                      subtitle: Text(
-                        '${t.category?.name ?? 'Uncategorized'} • ${DateFormat('MMM dd').format(DateTime.parse(t.transactionDate))}',
-                      ),
-                      trailing: Text(
-                        '${isIncome ? '+' : '-'} Rp ${NumberFormat('#,###').format(double.parse(t.amount))}',
-                        style: TextStyle(
-                          color: isIncome ? AppColors.finance : AppColors.bugs,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onTap: () =>
-                          context.go('/finance/transactions/edit', extra: t),
-                    ),
-                  );
-                }),
-              ],
-            ),
+            child: filtered.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      Center(child: Text('No matching transactions')),
+                    ],
+                  )
+                : ListView(
+                    children: [
+                      ExpenseCategoryChart(transactions: filtered),
+                      ...filtered.map((t) {
+                        final isIncome = t.type == 'income';
+                        return Slidable(
+                          key: ValueKey(t.id),
+                          endActionPane: ActionPane(
+                            motion: const DrawerMotion(),
+                            extentRatio: 0.35,
+                            children: [
+                              SlidableAction(
+                                onPressed: (_) => context.go(
+                                  '/finance/transactions/edit',
+                                  extra: t,
+                                ),
+                                backgroundColor: AppColors.jobs,
+                                foregroundColor: Colors.white,
+                                icon: Icons.edit,
+                                label: 'Edit',
+                              ),
+                              SlidableAction(
+                                onPressed: (_) => _confirmDelete(
+                                  title: t.description ?? 'transaction',
+                                  url:
+                                      '${ApiConstants.transactionsUrl}/${t.id}',
+                                ),
+                                backgroundColor: AppColors.bugs,
+                                foregroundColor: Colors.white,
+                                icon: Icons.delete,
+                                label: 'Delete',
+                              ),
+                            ],
+                          ),
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: isIncome
+                                    ? AppColors.finance.withValues(alpha: 0.2)
+                                    : AppColors.bugs.withValues(alpha: 0.2),
+                                child: Icon(
+                                  isIncome
+                                      ? Icons.arrow_upward
+                                      : Icons.arrow_downward,
+                                  color: isIncome
+                                      ? AppColors.finance
+                                      : AppColors.bugs,
+                                ),
+                              ),
+                              title: Text(t.description ?? 'No description'),
+                              subtitle: Text(
+                                '${t.category?.name ?? 'Uncategorized'} • ${DateFormat('MMM dd').format(DateTime.parse(t.transactionDate))}',
+                              ),
+                              trailing: Text(
+                                '${isIncome ? '+' : '-'} Rp ${NumberFormat('#,###').format(double.parse(t.amount))}',
+                                style: TextStyle(
+                                  color: isIncome
+                                      ? AppColors.finance
+                                      : AppColors.bugs,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onTap: () => context.go(
+                                '/finance/transactions/edit',
+                                extra: t,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
           ),
         ),
       ],
@@ -724,12 +809,6 @@ class _FinanceScreenState extends State<FinanceScreen>
       context: context,
       builder: (context) => const ImportCsvDialog(),
     ).then((_) => _loadAll());
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 }
 
