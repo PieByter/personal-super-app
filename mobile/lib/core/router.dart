@@ -11,6 +11,7 @@ import '../presentation/modules/finance/transaction_form_screen.dart';
 import '../presentation/modules/finance/budget_form_screen.dart';
 import '../presentation/modules/finance/goal_form_screen.dart';
 import '../presentation/modules/finance/investment_form_screen.dart';
+import '../presentation/modules/finance/recurring_form_screen.dart';
 import '../presentation/modules/finance/finance_category_form_screen.dart';
 import '../presentation/modules/journal/journal_screen.dart';
 import '../presentation/modules/journal/journal_entry_form_screen.dart';
@@ -45,6 +46,7 @@ import '../domain/models/transaction.dart';
 import '../domain/models/budget.dart';
 import '../domain/models/goal.dart';
 import '../domain/models/investment.dart';
+import '../domain/models/recurring_rule.dart';
 
 import '../domain/models/journal.dart';
 import '../domain/models/bug.dart';
@@ -139,6 +141,16 @@ class AppRouter {
         path: '/finance/investments/edit',
         builder: (context, state) => InvestmentFormScreen(
           investment: state.extra as Investment?,
+        ),
+      ),
+      GoRoute(
+        path: '/finance/recurring/new',
+        builder: (context, state) => const RecurringFormScreen(),
+      ),
+      GoRoute(
+        path: '/finance/recurring/edit',
+        builder: (context, state) => RecurringFormScreen(
+          rule: state.extra as RecurringRule?,
         ),
       ),
       GoRoute(

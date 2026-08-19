@@ -12,6 +12,7 @@ class ApiConstants {
   static const String budgetsUrl = '$baseUrl/finance/budgets';
   static const String goalsUrl = '$baseUrl/finance/goals';
   static const String investmentsUrl = '$baseUrl/finance/investments';
+  static const String recurringUrl = '$baseUrl/finance/recurring';
   static const String journalUrl = '$baseUrl/journal';
   static const String bugsUrl = '$baseUrl/bugs';
   static const String jobsUrl = '$baseUrl/jobs';

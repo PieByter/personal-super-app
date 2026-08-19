@@ -7,7 +7,9 @@ import '../../../domain/models/transaction.dart';
 import '../../../domain/models/budget.dart';
 import '../../../domain/models/goal.dart';
 import '../../../domain/models/investment.dart';
+import '../../../domain/models/recurring_rule.dart';
 import '../../widgets/app_drawer.dart';
+import '../../widgets/expense_category_chart.dart';
 
 class FinanceScreen extends StatefulWidget {
   const FinanceScreen({super.key});
@@ -23,12 +25,13 @@ class _FinanceScreenState extends State<FinanceScreen>
   List<Budget> _budgets = [];
   List<SavingGoal> _goals = [];
   List<Investment> _investments = [];
+  List<RecurringRule> _recurring = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _loadAll();
   }
 
@@ -39,6 +42,7 @@ class _FinanceScreenState extends State<FinanceScreen>
       _loadBudgets(),
       _loadGoals(),
       _loadInvestments(),
+      _loadRecurring(),
     ]);
     if (mounted) setState(() => _isLoading = false);
   }
@@ -99,6 +103,45 @@ class _FinanceScreenState extends State<FinanceScreen>
     }
   }
 
+  Future<void> _loadRecurring() async {
+    try {
+      final response = await ApiService().get(ApiConstants.recurringUrl);
+      if (mounted) {
+        setState(() {
+          _recurring =
+              (response as List).map((e) => RecurringRule.fromJson(e)).toList();
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  Future<void> _processRecurring() async {
+    try {
+      final response = await ApiService().post(
+        '${ApiConstants.recurringUrl}/process',
+        {},
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Processed ${response['created'] ?? 0} recurring transaction(s)',
+            ),
+          ),
+        );
+        await _loadAll();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   Future<void> _delete(String url) async {
     try {
       await ApiService().delete(url);
@@ -141,6 +184,13 @@ class _FinanceScreenState extends State<FinanceScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Finance'),
+        actions: [
+          IconButton(
+            tooltip: 'Import CSV',
+            icon: const Icon(Icons.upload_file),
+            onPressed: _showImportCsvDialog,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -148,6 +198,7 @@ class _FinanceScreenState extends State<FinanceScreen>
             Tab(text: 'Budgets', icon: Icon(Icons.pie_chart)),
             Tab(text: 'Goals', icon: Icon(Icons.savings)),
             Tab(text: 'Investments', icon: Icon(Icons.trending_up)),
+            Tab(text: 'Recurring', icon: Icon(Icons.repeat)),
           ],
         ),
       ),
@@ -159,6 +210,7 @@ class _FinanceScreenState extends State<FinanceScreen>
           _buildBudgetsTab(),
           _buildGoalsTab(),
           _buildInvestmentsTab(),
+          _buildRecurringTab(),
         ],
       ),
       floatingActionButton: _buildFab(),
@@ -174,6 +226,11 @@ class _FinanceScreenState extends State<FinanceScreen>
           'Add Investment',
           Icons.add,
           () => context.go('/finance/investments/new')
+        ),
+      4 => (
+          'Add Recurring',
+          Icons.add,
+          () => context.go('/finance/recurring/new')
         ),
       _ => ('Add', Icons.add, () => _showAddTransactionDialog()),
     };
@@ -227,40 +284,137 @@ class _FinanceScreenState extends State<FinanceScreen>
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            itemCount: _transactions.length,
-            itemBuilder: (context, index) {
-              final t = _transactions[index];
-              final isIncome = t.type == 'income';
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isIncome
-                        ? AppColors.finance.withValues(alpha: 0.2)
-                        : AppColors.bugs.withValues(alpha: 0.2),
-                    child: Icon(
-                      isIncome ? Icons.arrow_upward : Icons.arrow_downward,
-                      color: isIncome ? AppColors.finance : AppColors.bugs,
+          child: RefreshIndicator(
+            onRefresh: _loadAll,
+            child: ListView(
+              children: [
+                ExpenseCategoryChart(transactions: _transactions),
+                ..._transactions.map((t) {
+                  final isIncome = t.type == 'income';
+                  return Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
                     ),
-                  ),
-                  title: Text(t.description ?? 'No description'),
-                  subtitle: Text(
-                    '${t.category?.name ?? 'Uncategorized'} • ${DateFormat('MMM dd').format(DateTime.parse(t.transactionDate))}',
-                  ),
-                  trailing: Text(
-                    '${isIncome ? '+' : '-'} Rp ${NumberFormat('#,###').format(double.parse(t.amount))}',
-                    style: TextStyle(
-                      color: isIncome ? AppColors.finance : AppColors.bugs,
-                      fontWeight: FontWeight.bold,
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isIncome
+                            ? AppColors.finance.withValues(alpha: 0.2)
+                            : AppColors.bugs.withValues(alpha: 0.2),
+                        child: Icon(
+                          isIncome ? Icons.arrow_upward : Icons.arrow_downward,
+                          color: isIncome ? AppColors.finance : AppColors.bugs,
+                        ),
+                      ),
+                      title: Text(t.description ?? 'No description'),
+                      subtitle: Text(
+                        '${t.category?.name ?? 'Uncategorized'} • ${DateFormat('MMM dd').format(DateTime.parse(t.transactionDate))}',
+                      ),
+                      trailing: Text(
+                        '${isIncome ? '+' : '-'} Rp ${NumberFormat('#,###').format(double.parse(t.amount))}',
+                        style: TextStyle(
+                          color: isIncome ? AppColors.finance : AppColors.bugs,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () =>
+                          context.go('/finance/transactions/edit', extra: t),
                     ),
-                  ),
-                  onTap: () =>
-                      context.go('/finance/transactions/edit', extra: t),
-                ),
-              );
-            },
+                  );
+                }),
+              ],
+            ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecurringTab() {
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _processRecurring,
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Process Due Transactions'),
+            ),
+          ),
+        ),
+        Expanded(
+          child: _recurring.isEmpty
+              ? const Center(
+                  child: Text('No recurring rules yet. Tap + to add one.'),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadAll,
+                  child: ListView.builder(
+                    itemCount: _recurring.length,
+                    itemBuilder: (context, index) {
+                      final r = _recurring[index];
+                      final isIncome = r.type == 'income';
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor:
+                                (isIncome ? AppColors.finance : AppColors.bugs)
+                                    .withValues(alpha: 0.2),
+                            child: Icon(
+                              isIncome
+                                  ? Icons.arrow_upward
+                                  : Icons.arrow_downward,
+                              color:
+                                  isIncome ? AppColors.finance : AppColors.bugs,
+                            ),
+                          ),
+                          title: Text(
+                            r.description ?? 'Recurring ${r.frequency}',
+                          ),
+                          subtitle: Text(
+                            '${r.frequency[0].toUpperCase()}${r.frequency.substring(1)}'
+                            '${r.interval > 1 ? ' x${r.interval}' : ''} • '
+                            'Next: ${DateFormat('MMM dd, yyyy').format(DateTime.parse(r.nextExecution))}'
+                            ' • ${r.isActive ? 'Active' : 'Inactive'}',
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${isIncome ? '+' : '-'} Rp ${NumberFormat('#,###').format(double.parse(r.amount))}',
+                                style: TextStyle(
+                                  color: isIncome
+                                      ? AppColors.finance
+                                      : AppColors.bugs,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _confirmDelete(
+                                  title: r.description ?? 'recurring rule',
+                                  url: '${ApiConstants.recurringUrl}/${r.id}',
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () =>
+                              context.go('/finance/recurring/edit', extra: r),
+                        ),
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
@@ -436,70 +590,120 @@ class _FinanceScreenState extends State<FinanceScreen>
         child: Text('No investments yet. Tap + to add one.'),
       );
     }
-    return RefreshIndicator(
-      onRefresh: _loadAll,
-      child: ListView.builder(
-        itemCount: _investments.length,
-        itemBuilder: (context, index) {
-          final inv = _investments[index];
-          final qty = double.parse(inv.quantity);
-          final purchase = double.parse(inv.purchasePrice);
-          final current = inv.currentPrice != null
-              ? double.parse(inv.currentPrice!)
-              : purchase;
-          final totalValue = qty * current;
-          final totalCost = qty * purchase;
-          final profit = totalValue - totalCost;
-          final profitPct = totalCost > 0 ? (profit / totalCost) * 100 : 0.0;
-          final isProfit = profit >= 0;
-          return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.finance.withValues(alpha: 0.2),
-                child: Icon(Icons.trending_up, color: AppColors.finance),
-              ),
-              title: Text(inv.name),
-              subtitle: Text(
-                '${inv.type}${inv.symbol != null ? ' • ${inv.symbol}' : ''} • '
-                '${DateFormat('MMM dd, yyyy').format(DateTime.parse(inv.purchaseDate))}',
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Rp ${NumberFormat('#,###').format(totalValue)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        '${isProfit ? '+' : ''}${profitPct.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          color: isProfit ? AppColors.finance : AppColors.bugs,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                    onPressed: () => _confirmDelete(
-                      title: inv.name,
-                      url: '${ApiConstants.investmentsUrl}/${inv.id}',
-                    ),
-                  ),
-                ],
-              ),
-              onTap: () => context.go('/finance/investments/edit', extra: inv),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _refreshPrices,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh Prices'),
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadAll,
+            child: ListView.builder(
+              itemCount: _investments.length,
+              itemBuilder: (context, index) {
+                final inv = _investments[index];
+                final qty = double.parse(inv.quantity);
+                final purchase = double.parse(inv.purchasePrice);
+                final current = inv.currentPrice != null
+                    ? double.parse(inv.currentPrice!)
+                    : purchase;
+                final totalValue = qty * current;
+                final totalCost = qty * purchase;
+                final profit = totalValue - totalCost;
+                final profitPct =
+                    totalCost > 0 ? (profit / totalCost) * 100 : 0.0;
+                final isProfit = profit >= 0;
+                return Card(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.finance.withValues(alpha: 0.2),
+                      child: Icon(Icons.trending_up, color: AppColors.finance),
+                    ),
+                    title: Text(inv.name),
+                    subtitle: Text(
+                      '${inv.type}${inv.symbol != null ? ' • ${inv.symbol}' : ''} • '
+                      '${DateFormat('MMM dd, yyyy').format(DateTime.parse(inv.purchaseDate))}',
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Rp ${NumberFormat('#,###').format(totalValue)}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '${isProfit ? '+' : ''}${profitPct.toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                color: isProfit
+                                    ? AppColors.finance
+                                    : AppColors.bugs,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline,
+                              color: Colors.red),
+                          onPressed: () => _confirmDelete(
+                            title: inv.name,
+                            url: '${ApiConstants.investmentsUrl}/${inv.id}',
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () =>
+                        context.go('/finance/investments/edit', extra: inv),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  Future<void> _refreshPrices() async {
+    try {
+      final response = await ApiService().post(
+        '${ApiConstants.investmentsUrl}/refresh-prices',
+        {},
+      );
+      if (mounted) {
+        final updated = (response['updated'] as List?)?.length ?? 0;
+        final failed = (response['failed'] as List?)?.length ?? 0;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Updated $updated price(s)${failed > 0 ? ', $failed failed' : ''}'),
+          ),
+        );
+        await _loadAll();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   void _showAddTransactionDialog() {
@@ -510,9 +714,113 @@ class _FinanceScreenState extends State<FinanceScreen>
     );
   }
 
+  void _showImportCsvDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const ImportCsvDialog(),
+    ).then((_) => _loadAll());
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
+    super.dispose();
+  }
+}
+
+class ImportCsvDialog extends StatefulWidget {
+  const ImportCsvDialog({super.key});
+
+  @override
+  State<ImportCsvDialog> createState() => _ImportCsvDialogState();
+}
+
+class _ImportCsvDialogState extends State<ImportCsvDialog> {
+  final _csvController = TextEditingController();
+  bool _isLoading = false;
+  String? _result;
+
+  Future<void> _import() async {
+    if (_csvController.text.trim().isEmpty) return;
+    setState(() {
+      _isLoading = true;
+      _result = null;
+    });
+    try {
+      final response = await ApiService().post(
+        '${ApiConstants.transactionsUrl}/import',
+        {'csv': _csvController.text},
+      );
+      setState(() {
+        _isLoading = false;
+        _result = 'Imported ${response['created'] ?? 0} transaction(s), '
+            'skipped ${response['skipped'] ?? 0}.';
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _result = 'Error: ${e.toString()}';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Import CSV'),
+      content: SizedBox(
+        width: 500,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Paste bank statement CSV. Expected columns: '
+                'date, description, amount. Amount can be negative for '
+                'expenses or positive for income.',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _csvController,
+                maxLines: 8,
+                decoration: const InputDecoration(
+                  hintText:
+                      'date,description,amount\n2026-08-01,Indomaret,-25000\n2026-08-02,Gaji,5000000',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              if (_result != null) ...[
+                const SizedBox(height: 12),
+                Text(_result!),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Close'),
+        ),
+        FilledButton(
+          onPressed: _isLoading ? null : _import,
+          child: _isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Import'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _csvController.dispose();
     super.dispose();
   }
 }

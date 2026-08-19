@@ -119,6 +119,10 @@ vercel --prod
 - ✅ 401 auto-refresh + auto-logout on token expiry
 - ✅ **Pagination** on list endpoints (`?page=1&pageSize=20`)
 - ✅ **Admin bootstrap** endpoint (first user becomes admin)
+- ✅ **Charts & visualizations** (spending pie chart, income/expense bar chart)
+- ✅ **Recurring transaction automation** (rules + process due)
+- ✅ **CSV import** for bank statements
+- ✅ **Investment price tracking** (Yahoo Finance refresh)
 - ✅ Dark mode support
 - ✅ Biometric lock (Android/iOS)
 - ✅ Dashboard with aggregated metrics
@@ -130,9 +134,6 @@ vercel --prod
 
 ## Roadmap
 
-- [ ] CSV import for bank statements
 - [ ] Push notifications for reminders
 - [ ] Offline sync (SQLite)
-- [ ] Charts & visualizations
-- [ ] Recurring transaction automation
-- [ ] Investment price tracking
+- [ ] Recurring transaction automation (scheduled cron)

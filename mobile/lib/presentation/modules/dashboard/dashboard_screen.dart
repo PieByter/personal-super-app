@@ -4,6 +4,7 @@ import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/dashboard.dart';
 import '../../widgets/app_drawer.dart';
+import '../../widgets/income_expense_bar_chart.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -64,6 +65,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _buildSectionTitle('Finance This Month'),
                             const SizedBox(height: 12),
                             _buildFinanceCard(),
+                            const SizedBox(height: 12),
+                            Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: IncomeExpenseBarChart(
+                                  income: double.parse(
+                                    _data!.finance.monthIncome,
+                                  ),
+                                  expense: double.parse(
+                                    _data!.finance.monthExpense,
+                                  ),
+                                ),
+                              ),
+                            ),
                             const SizedBox(height: 24),
                             _buildSectionTitle('Active Habits (7 days)'),
                             const SizedBox(height: 12),
