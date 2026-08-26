@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
                 jobDescription: data.jobDescription,
                 notes: data.notes,
                 url: data.url,
+                websiteId: data.websiteId,
             })
             .returning();
 
@@ -88,6 +89,7 @@ export async function PUT(req: NextRequest) {
                 jobDescription: data.jobDescription,
                 notes: data.notes,
                 url: data.url,
+                websiteId: data.websiteId,
                 updatedAt: new Date(),
             })
             .where(and(eq(jobApplications.id, id), eq(jobApplications.userId, user.userId)))

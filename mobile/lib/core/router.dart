@@ -24,6 +24,7 @@ import '../presentation/modules/jobs/job_form_screen.dart';
 import '../presentation/modules/jobs/job_contacts_screen.dart';
 import '../presentation/modules/jobs/job_interviews_screen.dart';
 import '../presentation/modules/jobs/job_stats_screen.dart';
+import '../presentation/modules/jobs/job_websites_screen.dart';
 import '../presentation/modules/projects/projects_screen.dart';
 import '../presentation/modules/projects/project_form_screen.dart';
 import '../presentation/modules/projects/project_tasks_screen.dart';
@@ -219,6 +220,10 @@ class AppRouter {
       GoRoute(
         path: '/jobs/stats',
         builder: (context, state) => const JobStatsScreen(),
+      ),
+      GoRoute(
+        path: '/jobs/websites',
+        builder: (context, state) => const JobWebsitesScreen(),
       ),
       GoRoute(
         path: '/projects',

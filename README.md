@@ -86,6 +86,7 @@ psql -d your_database -f database/schema.sql
 | `/api/journal` | GET/POST | Journal entries |
 | `/api/bugs` | GET/POST | Bug entries |
 | `/api/jobs` | GET/POST | Job applications |
+| `/api/jobs/websites` | GET/POST/PUT/DELETE | Job source websites |
 | `/api/projects` | GET/POST | Projects |
 | `/api/habits` | GET/POST | Habits & logs |
 | `/api/subscriptions` | GET/POST | Subscriptions |

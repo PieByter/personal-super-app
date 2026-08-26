@@ -15,6 +15,7 @@ export const itemConditionEnum = pgEnum("item_condition", ["excellent", "good", 
 export const bookmarkStatusEnum = pgEnum("bookmark_status", ["unread", "reading", "completed", "archived"]);
 export const billingCycleEnum = pgEnum("billing_cycle", ["weekly", "monthly", "quarterly", "yearly", "lifetime"]);
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
+export const websiteStatusEnum = pgEnum("website_status", ["active", "inactive", "archived"]);
 
 // Users
 export const users = pgTable("users", {
@@ -189,6 +190,17 @@ export const bugEntries = pgTable("bug_entries", {
 });
 
 // Job Tracker
+export const jobWebsites = pgTable("job_websites", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    url: text("url"),
+    status: websiteStatusEnum("status").default("active"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
 export const jobApplications = pgTable("job_applications", {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
@@ -203,6 +215,7 @@ export const jobApplications = pgTable("job_applications", {
     notes: text("notes"),
     url: text("url"),
     isFavorite: boolean("is_favorite").default(false),
+    websiteId: uuid("website_id").references(() => jobWebsites.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

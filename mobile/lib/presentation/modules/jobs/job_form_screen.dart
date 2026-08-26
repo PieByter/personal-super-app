@@ -25,10 +25,13 @@ class _JobFormScreenState extends State<JobFormScreen> {
   String _status = 'applied';
   DateTime _applicationDate = DateTime.now();
   bool _isLoading = false;
+  List<JobWebsite> _websites = [];
+  String? _selectedWebsiteId;
 
   @override
   void initState() {
     super.initState();
+    _loadWebsites();
     final j = widget.job;
     if (j != null) {
       _companyController.text = j.companyName;
@@ -41,6 +44,22 @@ class _JobFormScreenState extends State<JobFormScreen> {
       _urlController.text = j.url ?? '';
       _status = j.status;
       _applicationDate = DateTime.tryParse(j.applicationDate) ?? DateTime.now();
+      _selectedWebsiteId = j.websiteId;
+    }
+  }
+
+  Future<void> _loadWebsites() async {
+    try {
+      final resp = await ApiService().get('${ApiConstants.jobsUrl}/websites');
+      setState(() {
+        _websites = (resp as List).map((e) => JobWebsite.fromJson(e)).toList();
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error load websites: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -70,6 +89,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
       'jobDescription': _descriptionController.text,
       'notes': _notesController.text,
       'url': _urlController.text,
+      'websiteId': _selectedWebsiteId,
     };
     try {
       final j = widget.job;
@@ -109,7 +129,23 @@ class _JobFormScreenState extends State<JobFormScreen> {
               decoration: const InputDecoration(labelText: 'Position'),
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField(
+            DropdownButtonFormField<String?>(
+              initialValue: _selectedWebsiteId,
+              decoration: const InputDecoration(labelText: 'Source Website'),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('None'),
+                ),
+                ..._websites.map((w) => DropdownMenuItem<String?>(
+                      value: w.id,
+                      child: Text('${w.name} (${w.status})'),
+                    )),
+              ],
+              onChanged: (v) => setState(() => _selectedWebsiteId = v),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
               initialValue: _status,
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
@@ -123,7 +159,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
                 DropdownMenuItem(value: 'withdrawn', child: Text('Withdrawn')),
                 DropdownMenuItem(value: 'accepted', child: Text('Accepted')),
               ],
-              onChanged: (v) => setState(() => _status = v as String),
+              onChanged: (v) => setState(() => _status = v ?? 'applied'),
             ),
             const SizedBox(height: 12),
             ListTile(

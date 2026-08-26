@@ -188,6 +188,17 @@ CREATE TABLE bug_entries (
 -- =====================================================
 -- 5. JOB APPLICATION TRACKER MODULE
 -- =====================================================
+CREATE TABLE job_websites (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    url TEXT,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE TABLE job_applications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -202,6 +213,7 @@ CREATE TABLE job_applications (
     notes TEXT,
     url TEXT,
     is_favorite BOOLEAN DEFAULT FALSE,
+    website_id UUID REFERENCES job_websites(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -456,6 +468,8 @@ CREATE INDEX idx_bugs_tags ON bug_entries USING GIN(tags);
 
 -- Jobs
 CREATE INDEX idx_job_applications_user ON job_applications(user_id, status);
+CREATE INDEX idx_job_websites_user ON job_websites(user_id);
+CREATE INDEX idx_job_applications_website ON job_applications(website_id);
 CREATE INDEX idx_job_interviews_job ON job_interviews(job_id);
 CREATE INDEX idx_job_contacts_job ON job_contacts(job_id);
 
@@ -517,6 +531,9 @@ CREATE TRIGGER update_bug_entries_updated_at BEFORE UPDATE ON bug_entries
 CREATE TRIGGER update_job_applications_updated_at BEFORE UPDATE ON job_applications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_job_websites_updated_at BEFORE UPDATE ON job_websites
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -572,6 +589,7 @@ ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entry_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bug_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE job_websites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_interviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE job_contacts ENABLE ROW LEVEL SECURITY;

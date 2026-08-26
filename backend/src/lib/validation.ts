@@ -58,6 +58,13 @@ export const bugEntrySchema = z.object({
 });
 
 // Job
+export const jobWebsiteSchema = z.object({
+    name: z.string().min(1),
+    url: z.string().url().optional(),
+    status: z.enum(["active", "inactive", "archived"]).optional(),
+    notes: z.string().optional(),
+});
+
 export const jobApplicationSchema = z.object({
     companyName: z.string().min(1),
     position: z.string().min(1),
@@ -69,6 +76,7 @@ export const jobApplicationSchema = z.object({
     jobDescription: z.string().optional(),
     notes: z.string().optional(),
     url: z.string().url().optional(),
+    websiteId: z.string().uuid().optional(),
 });
 
 // Project
