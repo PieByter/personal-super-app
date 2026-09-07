@@ -13,6 +13,7 @@ class InventoryItem {
   final String? location;
   final String? warrantyExpiry;
   final List<String>? tags;
+  final List<String>? photoUrls;
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -32,6 +33,7 @@ class InventoryItem {
     this.location,
     this.warrantyExpiry,
     this.tags,
+    this.photoUrls,
     this.isActive = true,
     required this.createdAt,
     required this.updatedAt,
@@ -53,6 +55,9 @@ class InventoryItem {
       location: json['location'],
       warrantyExpiry: json['warrantyExpiry'],
       tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
+      photoUrls: json['photoUrls'] != null
+          ? List<String>.from(json['photoUrls'])
+          : null,
       isActive: json['isActive'] ?? true,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),

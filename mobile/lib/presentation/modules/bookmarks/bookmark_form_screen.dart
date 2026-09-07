@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/bookmark.dart';
@@ -21,6 +22,13 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
   int? _rating;
   bool _isFavorite = false;
   bool _isLoading = false;
+  List<String> _tags = [];
+
+  /// Suggested tags for the multi-select chip field.
+  List<MultiSelectItem<String>> get _tagItems => [
+    for (final tag in ['tutorial', 'reference', 'tool', 'news', 'book', 'video'])
+      MultiSelectItem<String>(tag, tag),
+  ];
 
   @override
   void initState() {
@@ -34,6 +42,7 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
       _status = b.status;
       _rating = b.rating;
       _isFavorite = b.isFavorite;
+      _tags = b.tags ?? [];
     }
   }
 
@@ -48,6 +57,7 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
       'status': _status,
       'rating': _rating,
       'isFavorite': _isFavorite,
+      'tags': _tags.isEmpty ? null : _tags,
     };
     try {
       final b = widget.bookmark;
@@ -122,6 +132,20 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
               title: const Text('Favorite'),
               value: _isFavorite,
               onChanged: (v) => setState(() => _isFavorite = v),
+            ),
+            const SizedBox(height: 12),
+            MultiSelectChipField<String>(
+              title: const Text('Tags'),
+              headerColor: Colors.transparent,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              initialValue: _tags,
+              items: _tagItems,
+              onTap: (values) => setState(() => _tags = values),
             ),
             const SizedBox(height: 12),
             TextField(

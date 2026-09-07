@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/journal.dart';
@@ -19,6 +20,9 @@ class _JournalScreenState extends State<JournalScreen> {
   String? _error;
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _showCalendar = false;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
@@ -30,6 +34,30 @@ class _JournalScreenState extends State<JournalScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  /// Journal entry dates for calendar markers.
+  Set<DateTime> get _entryDates => _entries.map((e) => e.createdAt).toSet();
+
+  /// Entries filtered by search query and selected calendar day.
+  List<JournalEntry> get _filtered {
+    var result = _entries;
+    if (_selectedDay != null) {
+      final day = _selectedDay!;
+      result = result.where((e) {
+        final d = e.createdAt;
+        return d.year == day.year && d.month == day.month && d.day == day.day;
+      }).toList();
+    }
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result
+          .where((e) =>
+              e.title.toLowerCase().contains(q) ||
+              (e.projectName?.toLowerCase().contains(q) ?? false))
+          .toList();
+    }
+    return result;
   }
 
   Future<void> _loadEntries() async {
@@ -59,11 +87,46 @@ class _JournalScreenState extends State<JournalScreen> {
             icon: const Icon(Icons.label_outline),
             onPressed: () => context.go('/journal/tags'),
           ),
+          IconButton(
+            tooltip: 'Calendar',
+            icon: Icon(
+              _showCalendar ? Icons.calendar_month : Icons.calendar_today,
+            ),
+            onPressed: () => setState(() => _showCalendar = !_showCalendar),
+          ),
         ],
       ),
       drawer: const AppDrawer(currentRoute: '/journal'),
       body: Column(
         children: [
+          if (_showCalendar)
+            Card(
+              margin: const EdgeInsets.all(8),
+              child: TableCalendar(
+                firstDay: DateTime(2000),
+                lastDay: DateTime.now(),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
+                eventLoader: (day) => _entryDates.contains(day) ? [day] : [],
+                onDaySelected: (selected, focused) {
+                  setState(() {
+                    _selectedDay = selected;
+                    _focusedDay = focused;
+                  });
+                },
+                onPageChanged: (focused) => _focusedDay = focused,
+                calendarStyle: CalendarStyle(
+                  markerDecoration: const BoxDecoration(
+                    color: AppColors.journal,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: const BoxDecoration(
+                    color: AppColors.journal,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: TextField(
@@ -110,13 +173,7 @@ class _JournalScreenState extends State<JournalScreen> {
   }
 
   Widget _buildJournalList() {
-    final filtered = _searchQuery.isEmpty
-        ? _entries
-        : _entries.where((e) {
-            final q = _searchQuery.toLowerCase();
-            return (e.title.toLowerCase().contains(q)) ||
-                (e.projectName?.toLowerCase().contains(q) ?? false);
-          }).toList();
+    final filtered = _filtered;
 
     if (filtered.isEmpty) {
       return ListView(

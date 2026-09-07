@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
                 location: data.location,
                 warrantyExpiry: data.warrantyExpiry,
                 tags: data.tags,
+                photoUrls: data.photoUrls,
             })
             .returning();
 
@@ -94,6 +95,7 @@ export async function PUT(req: NextRequest) {
                 location: data.location,
                 warrantyExpiry: data.warrantyExpiry,
                 tags: data.tags,
+                photoUrls: data.photoUrls,
                 updatedAt: new Date(),
             })
             .where(and(eq(inventoryItems.id, id), eq(inventoryItems.userId, user.userId)))

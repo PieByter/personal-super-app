@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
@@ -69,12 +70,25 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor:
-                                    AppColors.inventory.withValues(alpha: 0.2),
-                                child: const Icon(Icons.inventory_2,
-                                    color: AppColors.inventory),
-                              ),
+                              leading: entry.photoUrls != null &&
+                                      entry.photoUrls!.isNotEmpty
+                                  ? ClipOval(
+                                      child: Image(
+                                        image: MemoryImage(base64Decode(entry
+                                            .photoUrls![0]
+                                            .split(',')
+                                            .last)),
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : CircleAvatar(
+                                      backgroundColor: AppColors.inventory
+                                          .withValues(alpha: 0.2),
+                                      child: const Icon(Icons.inventory_2,
+                                          color: AppColors.inventory),
+                                    ),
                               title: Text(entry.name),
                               subtitle: Text(
                                 '${entry.brand ?? "Unknown"} • ${entry.condition}',

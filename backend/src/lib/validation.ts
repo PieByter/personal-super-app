@@ -168,6 +168,7 @@ export const inventoryItemSchema = z.object({
     location: z.string().optional(),
     warrantyExpiry: z.string().optional(),
     tags: z.array(z.string()).optional(),
+    photoUrls: z.array(z.string()).max(5).optional(),
 });
 
 // Bookmark

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/inventory.dart';
@@ -28,6 +30,7 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
   DateTime? _warrantyExpiry;
   bool _isActive = true;
   bool _isLoading = false;
+  List<String> _photoUrls = [];
 
   @override
   void initState() {
@@ -49,7 +52,27 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
           ? DateTime.tryParse(i.warrantyExpiry!)
           : null;
       _isActive = i.isActive;
+      _photoUrls = i.photoUrls ?? [];
     }
+  }
+
+  Future<void> _pickPhoto() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 70,
+    );
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    final dataUri = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+    setState(() => _photoUrls.add(dataUri));
+  }
+
+  ImageProvider? _photoProvider(String dataUri) {
+    final parts = dataUri.split(',');
+    if (parts.length < 2) return null;
+    return MemoryImage(base64Decode(parts[1]));
   }
 
   Future<void> _pickDate({required bool isWarranty}) async {
@@ -88,6 +111,7 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
       'purchaseDate': _purchaseDate?.toIso8601String().split('T')[0],
       'warrantyExpiry': _warrantyExpiry?.toIso8601String().split('T')[0],
       'isActive': _isActive,
+      'photoUrls': _photoUrls.isEmpty ? null : _photoUrls,
     };
     try {
       final i = widget.item;
@@ -117,6 +141,54 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
+            if (_photoUrls.isNotEmpty) ...[
+              SizedBox(
+                height: 80,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _photoUrls.length,
+                  separatorBuilder: (_, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image(
+                            image: _photoProvider(_photoUrls[index])!,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: InkWell(
+                            onTap: () =>
+                                setState(() => _photoUrls.removeAt(index)),
+                            child: const CircleAvatar(
+                              radius: 10,
+                              backgroundColor: Colors.black54,
+                              child: Icon(Icons.close,
+                                  size: 12, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            OutlinedButton.icon(
+              onPressed: _photoUrls.length >= 5 ? null : _pickPhoto,
+              icon: const Icon(Icons.photo_library_outlined),
+              label: Text(
+                _photoUrls.isEmpty ? 'Add Photo' : 'Add Another Photo',
+              ),
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Item Name'),
