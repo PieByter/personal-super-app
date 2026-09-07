@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/job.dart';
@@ -27,6 +28,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
   bool _isLoading = false;
   List<JobWebsite> _websites = [];
   String? _selectedWebsiteId;
+  final _websiteController = TextEditingController();
 
   @override
   void initState() {
@@ -53,6 +55,12 @@ class _JobFormScreenState extends State<JobFormScreen> {
       final resp = await ApiService().get('${ApiConstants.jobsUrl}/websites');
       setState(() {
         _websites = (resp as List).map((e) => JobWebsite.fromJson(e)).toList();
+        // Prefill the typeahead with the selected website's name when editing.
+        if (_selectedWebsiteId != null) {
+          final selected =
+              _websites.where((w) => w.id == _selectedWebsiteId).firstOrNull;
+          if (selected != null) _websiteController.text = selected.name;
+        }
       });
     } catch (e) {
       if (mounted) {
@@ -129,20 +137,41 @@ class _JobFormScreenState extends State<JobFormScreen> {
               decoration: const InputDecoration(labelText: 'Position'),
             ),
             const SizedBox(height: 12),
-            DropdownButtonFormField<String?>(
-              initialValue: _selectedWebsiteId,
-              decoration: const InputDecoration(labelText: 'Source Website'),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('None'),
-                ),
-                ..._websites.map((w) => DropdownMenuItem<String?>(
-                      value: w.id,
-                      child: Text('${w.name} (${w.status})'),
-                    )),
-              ],
-              onChanged: (v) => setState(() => _selectedWebsiteId = v),
+            TypeAheadField<String>(
+              controller: _websiteController,
+              suggestionsCallback: (pattern) {
+                final q = pattern.toLowerCase();
+                return _websites
+                    .where((w) =>
+                        w.name.toLowerCase().contains(q) ||
+                        (w.url?.toLowerCase().contains(q) ?? false))
+                    .map((w) => w.id)
+                    .toList();
+              },
+              itemBuilder: (context, websiteId) {
+                final w = _websites.firstWhere((x) => x.id == websiteId);
+                return ListTile(
+                  title: Text(w.name),
+                  subtitle: Text(w.status),
+                );
+              },
+              onSelected: (websiteId) {
+                final w = _websites.firstWhere((x) => x.id == websiteId);
+                setState(() {
+                  _selectedWebsiteId = websiteId;
+                  _websiteController.text = w.name;
+                });
+              },
+              builder: (context, controller, focusNode) {
+                return TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Source Website (type to search)',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
@@ -237,6 +266,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _descriptionController.dispose();
     _notesController.dispose();
     _urlController.dispose();
+    _websiteController.dispose();
     super.dispose();
   }
 }

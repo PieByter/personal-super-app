@@ -4,6 +4,7 @@ import 'core/theme.dart';
 import 'core/router.dart';
 import 'data/theme_service.dart';
 import 'data/app_localizations.dart';
+import 'data/connectivity_service.dart';
 
 class PersonalSuperApp extends StatelessWidget {
   const PersonalSuperApp({super.key});
@@ -34,6 +35,41 @@ class PersonalSuperApp extends StatelessWidget {
                     GlobalCupertinoLocalizations.delegate,
                   ],
                   routerConfig: AppRouter.router,
+                  builder: (context, child) {
+                    return Column(
+                      children: [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: ConnectivityService().isOnline,
+                          builder: (context, online, _) {
+                            if (online) return const SizedBox.shrink();
+                            return Material(
+                              color: Colors.orange.shade800,
+                              child: SafeArea(
+                                bottom: false,
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                    horizontal: 12,
+                                  ),
+                                  child: const Text(
+                                    'Offline — data may not sync',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Expanded(child: child ?? const SizedBox.shrink()),
+                      ],
+                    );
+                  },
                 );
               },
             );

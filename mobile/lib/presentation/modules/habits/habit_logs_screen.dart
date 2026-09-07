@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/habit.dart';
@@ -21,12 +22,33 @@ class _HabitLogsScreenState extends State<HabitLogsScreen> {
   final _notesController = TextEditingController();
   final _moodController = TextEditingController();
   DateTime _logDate = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
     _valueController.text = widget.habit.targetValue ?? '1';
     _loadLogs();
+  }
+
+  /// Dates that have at least one log, for calendar markers.
+  Set<DateTime> get _loggedDates => _logs
+      .map((l) => DateTime.tryParse(l.logDate))
+      .whereType<DateTime>()
+      .toSet();
+
+  /// Logs filtered by the selected calendar day (null = all).
+  List<HabitLog> get _visibleLogs {
+    if (_selectedDay == null) return _logs;
+    final day = _selectedDay!;
+    return _logs.where((l) {
+      final d = DateTime.tryParse(l.logDate);
+      return d != null &&
+          d.year == day.year &&
+          d.month == day.month &&
+          d.day == day.day;
+    }).toList();
   }
 
   Future<void> _loadLogs() async {
@@ -129,32 +151,87 @@ class _HabitLogsScreenState extends State<HabitLogsScreen> {
                 ? const Center(child: CircularProgressIndicator())
                 : _error != null
                     ? Center(child: Text('Error: $_error'))
-                    : _logs.isEmpty
-                        ? const Center(child: Text('No logs yet'))
-                        : ListView.builder(
-                            itemCount: _logs.length,
-                            itemBuilder: (context, index) {
-                              final l = _logs[index];
-                              return Card(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor:
-                                        AppColors.habits.withValues(alpha: 0.2),
-                                    child: const Icon(Icons.check_circle,
-                                        color: AppColors.habits),
-                                  ),
-                                  title: Text(
-                                      '${l.value} ${widget.habit.unit ?? ''}'),
-                                  subtitle: Text(
-                                    '${l.logDate}\n${l.mood ?? ''} ${l.notes ?? ''}',
-                                  ),
-                                  isThreeLine: true,
+                    : Column(
+                        children: [
+                          Card(
+                            margin: const EdgeInsets.all(8),
+                            child: TableCalendar(
+                              firstDay: DateTime(2000),
+                              lastDay: DateTime.now(),
+                              focusedDay: _focusedDay,
+                              selectedDayPredicate: (day) =>
+                                  isSameDay(day, _selectedDay),
+                              eventLoader: (day) =>
+                                  _loggedDates.contains(day) ? [day] : [],
+                              onDaySelected: (selected, focused) {
+                                setState(() {
+                                  _selectedDay = selected;
+                                  _focusedDay = focused;
+                                });
+                              },
+                              onPageChanged: (focused) => _focusedDay = focused,
+                              calendarStyle: CalendarStyle(
+                                markerDecoration: const BoxDecoration(
+                                  color: AppColors.habits,
+                                  shape: BoxShape.circle,
                                 ),
-                              );
-                            },
+                                todayDecoration: BoxDecoration(
+                                  color: AppColors.habits.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                selectedDecoration: const BoxDecoration(
+                                  color: AppColors.habits,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
                           ),
+                          if (_selectedDay != null)
+                            ListTile(
+                              title: Text(
+                                'Logs for ${DateFormat('yyyy-MM-dd').format(_selectedDay!)}',
+                              ),
+                              trailing: TextButton(
+                                onPressed: () =>
+                                    setState(() => _selectedDay = null),
+                                child: const Text('Show all'),
+                              ),
+                            ),
+                          Expanded(
+                            child: _visibleLogs.isEmpty
+                                ? const Center(
+                                    child: Text('No logs for this day'),
+                                  )
+                                : ListView.builder(
+                                    itemCount: _visibleLogs.length,
+                                    itemBuilder: (context, index) {
+                                      final l = _visibleLogs[index];
+                                      return Card(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 8),
+                                        child: ListTile(
+                                          leading: CircleAvatar(
+                                            backgroundColor: AppColors.habits
+                                                .withValues(alpha: 0.2),
+                                            child: const Icon(
+                                                Icons.check_circle,
+                                                color: AppColors.habits),
+                                          ),
+                                          title: Text(
+                                              '${l.value} ${widget.habit.unit ?? ''}'),
+                                          subtitle: Text(
+                                            '${l.logDate}\n${l.mood ?? ''} ${l.notes ?? ''}',
+                                          ),
+                                          isThreeLine: true,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      ),
           ),
         ],
       ),

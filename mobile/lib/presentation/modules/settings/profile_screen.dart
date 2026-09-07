@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/user.dart';
@@ -48,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'fullName': _nameController.text,
         'timezone': _timezoneController.text,
         'currency': _currencyController.text,
+        'avatarUrl': _user?.avatarUrl,
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -99,6 +102,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _pickAvatar() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 256,
+      maxHeight: 256,
+      imageQuality: 70,
+    );
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    final dataUri = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+    setState(() => _user = _user?.copyWith(avatarUrl: dataUri));
+    // Save immediately so the avatar persists.
+    try {
+      await ApiService().put('${ApiConstants.baseUrl}/profile', {
+        'avatarUrl': dataUri,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Avatar updated')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  /// Returns a provider for the avatar, or null to show the initial letter.
+  ImageProvider? _avatarImage() {
+    final url = _user?.avatarUrl;
+    if (url == null || url.isEmpty) return null;
+    if (url.startsWith('data:')) {
+      final parts = url.split(',');
+      if (parts.length < 2) return null;
+      return MemoryImage(base64Decode(parts[1]));
+    }
+    return NetworkImage(url);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,15 +154,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               child: ListView(
                 children: [
-                  CircleAvatar(
-                    radius: 48,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Text(
-                      _user?.email.substring(0, 1).toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        color: Colors.white,
-                      ),
+                  Center(
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 48,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          backgroundImage: _avatarImage(),
+                          child: _avatarImage() == null
+                              ? Text(
+                                  _user?.email.substring(0, 1).toUpperCase() ??
+                                      'U',
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.camera_alt,
+                                  size: 16, color: Colors.white),
+                              onPressed: _pickAvatar,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 16),

@@ -27,11 +27,20 @@ class User {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'email': email,
-    'fullName': fullName,
-    'avatarUrl': avatarUrl,
-    'timezone': timezone,
-    'currency': currency,
-  };
+        'id': id,
+        'email': email,
+        'fullName': fullName,
+        'avatarUrl': avatarUrl,
+        'timezone': timezone,
+        'currency': currency,
+      };
+
+  User copyWith({String? avatarUrl}) => User(
+        id: id,
+        email: email,
+        fullName: fullName,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
+        timezone: timezone,
+        currency: currency,
+      );
 }

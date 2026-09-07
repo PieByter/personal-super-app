@@ -6,6 +6,7 @@ import 'data/api_service.dart';
 import 'data/theme_service.dart';
 import 'data/app_localizations.dart';
 import 'data/pwa_install_service.dart';
+import 'data/connectivity_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,9 @@ void main() {
 
   // Detect PWA install availability (web only).
   PwaInstallService().init();
+
+  // Track network connectivity for the offline banner.
+  ConnectivityService().init();
 
   // When the API returns 401 (expired/invalid token), clear the session
   // and redirect the user to the login screen.
