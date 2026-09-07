@@ -26,9 +26,16 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
 
   /// Suggested tags for the multi-select chip field.
   List<MultiSelectItem<String>> get _tagItems => [
-    for (final tag in ['tutorial', 'reference', 'tool', 'news', 'book', 'video'])
-      MultiSelectItem<String>(tag, tag),
-  ];
+        for (final tag in [
+          'tutorial',
+          'reference',
+          'tool',
+          'news',
+          'book',
+          'video'
+        ])
+          MultiSelectItem<String>(tag, tag),
+      ];
 
   @override
   void initState() {
