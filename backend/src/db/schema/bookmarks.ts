@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { bookmarkStatusEnum } from "./enums";
 
@@ -11,7 +11,9 @@ export const bookmarkCollections = pgTable("bookmark_collections", {
     icon: varchar("icon", { length: 50 }),
     parentId: uuid("parent_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("bookmark_collections_user_id_idx").on(t.userId),
+]);
 
 export const bookmarks = pgTable("bookmarks", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -27,4 +29,7 @@ export const bookmarks = pgTable("bookmarks", {
     tags: varchar("tags", { length: 50 }).array(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("bookmarks_user_id_idx").on(t.userId),
+    index("bookmarks_status_idx").on(t.userId, t.status),
+]);

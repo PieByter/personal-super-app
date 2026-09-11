@@ -27,7 +27,7 @@ import {
     bookmarks,
 } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -63,27 +63,39 @@ export async function GET(req: NextRequest) {
         db.select().from(bugEntries).where(eq(bugEntries.userId, user.userId)),
     ]);
 
-    const [jobApplicationsRows, jobInterviewsRows, jobContactsRows] = await Promise.all([
+    const [jobApplicationsRows, projectsRows, habitsRows, subscriptionsRows] = await Promise.all([
         db.select().from(jobApplications).where(eq(jobApplications.userId, user.userId)),
-        db.select().from(jobInterviews),
-        db.select().from(jobContacts),
-    ]);
-
-    const [projectsRows, projectMilestonesRows, projectTasksRows] = await Promise.all([
         db.select().from(projects).where(eq(projects.userId, user.userId)),
-        db.select().from(projectMilestones),
-        db.select().from(projectTasks),
-    ]);
-
-    const [habitsRows, habitLogsRows, dailyMetricsRows] = await Promise.all([
         db.select().from(habits).where(eq(habits.userId, user.userId)),
-        db.select().from(habitLogs),
-        db.select().from(dailyMetrics).where(eq(dailyMetrics.userId, user.userId)),
+        db.select().from(subscriptions).where(eq(subscriptions.userId, user.userId)),
     ]);
 
-    const [subscriptionsRows, subscriptionPaymentsRows] = await Promise.all([
-        db.select().from(subscriptions).where(eq(subscriptions.userId, user.userId)),
-        db.select().from(subscriptionPayments),
+    // Fetch child-table rows filtered by their parent IDs (owned by this user)
+    const jobIds = jobApplicationsRows.map((r) => r.id);
+    const projectIds = projectsRows.map((r) => r.id);
+    const habitIds = habitsRows.map((r) => r.id);
+    const subscriptionIds = subscriptionsRows.map((r) => r.id);
+
+    const [jobInterviewsRows, jobContactsRows, projectMilestonesRows, projectTasksRows, habitLogsRows, dailyMetricsRows, subscriptionPaymentsRows] = await Promise.all([
+        jobIds.length > 0
+            ? db.select().from(jobInterviews).where(inArray(jobInterviews.jobId, jobIds))
+            : Promise.resolve([]),
+        jobIds.length > 0
+            ? db.select().from(jobContacts).where(inArray(jobContacts.jobId, jobIds))
+            : Promise.resolve([]),
+        projectIds.length > 0
+            ? db.select().from(projectMilestones).where(inArray(projectMilestones.projectId, projectIds))
+            : Promise.resolve([]),
+        projectIds.length > 0
+            ? db.select().from(projectTasks).where(inArray(projectTasks.projectId, projectIds))
+            : Promise.resolve([]),
+        habitIds.length > 0
+            ? db.select().from(habitLogs).where(inArray(habitLogs.habitId, habitIds))
+            : Promise.resolve([]),
+        db.select().from(dailyMetrics).where(eq(dailyMetrics.userId, user.userId)),
+        subscriptionIds.length > 0
+            ? db.select().from(subscriptionPayments).where(inArray(subscriptionPayments.subscriptionId, subscriptionIds))
+            : Promise.resolve([]),
     ]);
 
     const [inventoryCategoriesRows, inventoryItemsRows] = await Promise.all([

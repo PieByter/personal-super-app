@@ -1,16 +1,8 @@
 {
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "JWT_SECRET": "@jwt-secret",
-    "CRON_SECRET": "@cron-secret"
-  },
   "crons": [
     {
       "path": "/api/cron/recurring",
-      "schedule": "0 0 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }

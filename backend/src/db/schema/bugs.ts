@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { bugStatusEnum, bugSeverityEnum } from "./enums";
 
@@ -19,4 +19,7 @@ export const bugEntries = pgTable("bug_entries", {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
     solvedAt: timestamp("solved_at", { withTimezone: true }),
-});
+}, (t) => [
+    index("bug_entries_user_id_idx").on(t.userId),
+    index("bug_entries_status_idx").on(t.userId, t.status),
+]);

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, index } from "drizzle-orm/pg-core";
 import { userRoleEnum } from "./enums";
 
 export const users = pgTable("users", {
@@ -21,7 +21,9 @@ export const refreshTokens = pgTable("refresh_tokens", {
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("refresh_tokens_user_id_idx").on(t.userId),
+]);
 
 export const passwordResets = pgTable("password_resets", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -30,4 +32,6 @@ export const passwordResets = pgTable("password_resets", {
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedAt: timestamp("used_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("password_resets_user_id_idx").on(t.userId),
+]);

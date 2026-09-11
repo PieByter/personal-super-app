@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, time } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, time, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { habitFrequencyEnum } from "./enums";
 
@@ -17,7 +17,9 @@ export const habits = pgTable("habits", {
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("habits_user_id_idx").on(t.userId),
+]);
 
 export const habitLogs = pgTable("habit_logs", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -27,7 +29,10 @@ export const habitLogs = pgTable("habit_logs", {
     notes: text("notes"),
     mood: varchar("mood", { length: 20 }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("habit_logs_habit_id_idx").on(t.habitId),
+    index("habit_logs_habit_date_idx").on(t.habitId, t.logDate),
+]);
 
 export const dailyMetrics = pgTable("daily_metrics", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -45,4 +50,7 @@ export const dailyMetrics = pgTable("daily_metrics", {
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("daily_metrics_user_id_idx").on(t.userId),
+    index("daily_metrics_user_date_idx").on(t.userId, t.metricDate),
+]);

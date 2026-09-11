@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const journalEntries = pgTable("journal_entries", {
@@ -15,7 +15,9 @@ export const journalEntries = pgTable("journal_entries", {
     isFavorite: boolean("is_favorite").default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("journal_entries_user_id_idx").on(t.userId),
+]);
 
 export const journalTags = pgTable("journal_tags", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -23,7 +25,9 @@ export const journalTags = pgTable("journal_tags", {
     name: varchar("name", { length: 50 }).notNull(),
     color: varchar("color", { length: 7 }).default("#6366F1"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("journal_tags_user_id_idx").on(t.userId),
+]);
 
 export const journalEntryTags = pgTable("journal_entry_tags", {
     journalId: uuid("journal_id").references(() => journalEntries.id, { onDelete: "cascade" }).notNull(),

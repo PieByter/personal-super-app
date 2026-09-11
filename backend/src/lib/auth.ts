@@ -3,7 +3,15 @@ import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key-change-in-production";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error(
+        "JWT_SECRET environment variable is not set. " +
+        "Set it in your .env file or deployment environment before starting the server."
+    );
+}
+// After the guard above, JWT_SECRET is guaranteed to be a non-empty string.
+const SECRET = JWT_SECRET as string;
 
 export interface JWTPayload {
     userId: string;
@@ -26,7 +34,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * Used in the Authorization header for every API request.
  */
 export function generateAccessToken(userId: string, email: string, role: string = "user"): string {
-    return jwt.sign({ userId, email, role }, JWT_SECRET, { expiresIn: "15m" });
+    return jwt.sign({ userId, email, role }, SECRET, { expiresIn: "15m" });
 }
 
 /**
@@ -37,11 +45,11 @@ export function generateRefreshToken(): string {
 }
 
 export function generateToken(userId: string, email: string, role: string = "user"): string {
-    return jwt.sign({ userId, email, role }, JWT_SECRET, { expiresIn: "7d" });
+    return jwt.sign({ userId, email, role }, SECRET, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): JWTPayload {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    return jwt.verify(token, SECRET) as JWTPayload;
 }
 
 export function getAuthUser(req: NextRequest): JWTPayload | null {

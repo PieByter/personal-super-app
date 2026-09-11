@@ -4,6 +4,7 @@ import { users } from "@/db/schema";
 import { getAuthUser, requireAdmin } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
+import { apiError } from "@/lib/api-error";
 
 const updateUserSchema = z.object({
     fullName: z.string().optional(),
@@ -54,7 +55,7 @@ export async function PUT(req: NextRequest) {
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
         return Response.json(updated);
     } catch (e) {
-        return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 });
+        return apiError(e);
     }
 }
 
@@ -70,6 +71,6 @@ export async function DELETE(req: NextRequest) {
         await db.delete(users).where(eq(users.id, id));
         return Response.json({ success: true });
     } catch (e) {
-        return Response.json({ error: "Internal server error" }, { status: 500 });
+        return apiError(e);
     }
 }

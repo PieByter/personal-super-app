@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, date, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { projectStatusEnum, taskStatusEnum, priorityEnum } from "./enums";
 
@@ -20,7 +20,9 @@ export const projects = pgTable("projects", {
     color: varchar("color", { length: 7 }).default("#8B5CF6"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("projects_user_id_idx").on(t.userId),
+]);
 
 export const projectMilestones = pgTable("project_milestones", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -31,7 +33,9 @@ export const projectMilestones = pgTable("project_milestones", {
     completedAt: timestamp("completed_at", { withTimezone: true }),
     isCompleted: boolean("is_completed").default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("project_milestones_project_id_idx").on(t.projectId),
+]);
 
 export const projectTasks = pgTable("project_tasks", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -46,4 +50,7 @@ export const projectTasks = pgTable("project_tasks", {
     tags: varchar("tags", { length: 50 }).array(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("project_tasks_project_id_idx").on(t.projectId),
+    index("project_tasks_status_idx").on(t.projectId, t.status),
+]);

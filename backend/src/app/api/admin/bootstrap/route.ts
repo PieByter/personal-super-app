@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, count } from "drizzle-orm";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 /**
  * Bootstrap admin: promotes the calling user to admin, but ONLY if no admin
@@ -10,6 +11,10 @@ import { eq, count } from "drizzle-orm";
  * Once an admin exists, this endpoint refuses to work.
  */
 export async function POST(req: NextRequest) {
+    // Rate-limit to 5 attempts per minute to prevent brute-force/racing.
+    const rl = rateLimit(req, { windowMs: 60_000, max: 5 });
+    if (!rl.success) return rateLimitResponse(rl.retryAfterSeconds!);
+
     const user = getAuthUser(req);
     if (!user) return unauthorizedResponse();
 

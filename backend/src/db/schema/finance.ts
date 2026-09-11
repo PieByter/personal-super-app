@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, index, AnyPgColumn } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { transactionTypeEnum, frequencyEnum, budgetPeriodEnum } from "./enums";
 
@@ -9,9 +9,11 @@ export const financeCategories = pgTable("finance_categories", {
     type: transactionTypeEnum("type").notNull(),
     color: varchar("color", { length: 7 }).default("#3B82F6"),
     icon: varchar("icon", { length: 50 }),
-    parentId: uuid("parent_id"),
+    parentId: uuid("parent_id").references((): AnyPgColumn => financeCategories.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_categories_user_id_idx").on(t.userId),
+]);
 
 export const financeTransactions = pgTable("finance_transactions", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -23,12 +25,17 @@ export const financeTransactions = pgTable("finance_transactions", {
     transactionDate: date("transaction_date").notNull(),
     paymentMethod: varchar("payment_method", { length: 50 }),
     isRecurring: boolean("is_recurring").default(false),
-    recurringRuleId: uuid("recurring_rule_id"),
+    recurringRuleId: uuid("recurring_rule_id").references(() => financeRecurringRules.id, { onDelete: "set null" }),
     tags: varchar("tags", { length: 50 }).array(),
     attachmentUrl: text("attachment_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_transactions_user_id_idx").on(t.userId),
+    index("finance_transactions_user_date_idx").on(t.userId, t.transactionDate),
+    index("finance_transactions_user_type_idx").on(t.userId, t.type),
+    index("finance_transactions_category_id_idx").on(t.categoryId),
+]);
 
 export const financeRecurringRules = pgTable("finance_recurring_rules", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -44,7 +51,9 @@ export const financeRecurringRules = pgTable("finance_recurring_rules", {
     nextExecution: date("next_execution").notNull(),
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_recurring_rules_user_id_idx").on(t.userId),
+]);
 
 export const financeBudgets = pgTable("finance_budgets", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -57,7 +66,9 @@ export const financeBudgets = pgTable("finance_budgets", {
     alertThreshold: decimal("alert_threshold", { precision: 5, scale: 2 }).default("80.00"),
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_budgets_user_id_idx").on(t.userId),
+]);
 
 export const financeSavingGoals = pgTable("finance_saving_goals", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -71,7 +82,9 @@ export const financeSavingGoals = pgTable("finance_saving_goals", {
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_saving_goals_user_id_idx").on(t.userId),
+]);
 
 export const financeInvestments = pgTable("finance_investments", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -87,4 +100,6 @@ export const financeInvestments = pgTable("finance_investments", {
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("finance_investments_user_id_idx").on(t.userId),
+]);

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, integer, date, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { billingCycleEnum } from "./enums";
 
@@ -19,7 +19,10 @@ export const subscriptions = pgTable("subscriptions", {
     reminderDays: integer("reminder_days").default(3),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("subscriptions_user_id_idx").on(t.userId),
+    index("subscriptions_renewal_idx").on(t.userId, t.nextRenewalDate),
+]);
 
 export const subscriptionPayments = pgTable("subscription_payments", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -28,4 +31,6 @@ export const subscriptionPayments = pgTable("subscription_payments", {
     paymentDate: date("payment_date").notNull(),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("subscription_payments_subscription_id_idx").on(t.subscriptionId),
+]);

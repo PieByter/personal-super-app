@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, integer, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, boolean, integer, date, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { jobStatusEnum, websiteStatusEnum } from "./enums";
 
@@ -11,7 +11,9 @@ export const jobWebsites = pgTable("job_websites", {
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("job_websites_user_id_idx").on(t.userId),
+]);
 
 export const jobApplications = pgTable("job_applications", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -30,7 +32,10 @@ export const jobApplications = pgTable("job_applications", {
     websiteId: uuid("website_id").references(() => jobWebsites.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("job_applications_user_id_idx").on(t.userId),
+    index("job_applications_status_idx").on(t.userId, t.status),
+]);
 
 export const jobInterviews = pgTable("job_interviews", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -46,7 +51,9 @@ export const jobInterviews = pgTable("job_interviews", {
     notes: text("notes"),
     status: varchar("status", { length: 20 }).default("scheduled"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("job_interviews_job_id_idx").on(t.jobId),
+]);
 
 export const jobContacts = pgTable("job_contacts", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -58,4 +65,6 @@ export const jobContacts = pgTable("job_contacts", {
     linkedinUrl: text("linkedin_url"),
     notes: text("notes"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("job_contacts_job_id_idx").on(t.jobId),
+]);

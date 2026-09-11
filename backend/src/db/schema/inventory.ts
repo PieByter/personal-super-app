@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, date } from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, text, timestamp, decimal, boolean, date, index } from "drizzle-orm/pg-core";
 import { users } from "./users";
 import { itemConditionEnum } from "./enums";
 
@@ -9,7 +9,9 @@ export const inventoryCategories = pgTable("inventory_categories", {
     description: text("description"),
     icon: varchar("icon", { length: 50 }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("inventory_categories_user_id_idx").on(t.userId),
+]);
 
 export const inventoryItems = pgTable("inventory_items", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -33,4 +35,6 @@ export const inventoryItems = pgTable("inventory_items", {
     isActive: boolean("is_active").default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-});
+}, (t) => [
+    index("inventory_items_user_id_idx").on(t.userId),
+]);
