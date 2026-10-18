@@ -139,18 +139,49 @@ All endpoints follow the same shape — clients must match it exactly:
 
 ## Deployment
 
-### Backend to Vercel
+The intended setup is **Vercel** (Next.js API) + **Supabase** (Postgres) + the
+Flutter app. Docker is only a local option for machines without Postgres.
+
+### 1. Database (Supabase)
+
+Paste `database/schema.sql` into the Supabase SQL Editor and run it (it creates
+the 30+ tables, indexes, triggers and enables RLS). RLS is enabled without
+policies on purpose: the backend connects as the table owner, and the app
+authenticates with its own JWTs — never expose the anon key to a client.
+
+### 2. Backend to Vercel
 
 ```bash
 cd backend
 vercel --prod
 ```
 
-### Environment Variables (Vercel)
+Environment variables:
 
-- `DATABASE_URL` - PostgreSQL connection string
-- `JWT_SECRET` - Random secret for token signing
-- `CRON_SECRET` - Secret for the scheduled cron endpoint
+- `DATABASE_URL` — Supabase **pooler** URI (port `6543`) with `sslmode=require`:
+  `postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?sslmode=require`
+  Prisma-only parameters (`pgbouncer=true`, `connection_limit=1`) are harmless in
+  the dashboard copy but are stripped by `lib/db-url.ts`, because postgres.js
+  forwards unknown parameters as startup parameters and the pooler rejects them.
+  Prepared statements are already disabled (`prepare: false`), which is required
+  when going through a transaction pooler.
+- `JWT_SECRET` — random secret. It must exist **at build time**: Next inlines env
+  values into the Edge middleware, so a build without it produces an API that
+  rejects every token with `401 Invalid token`.
+- `CRON_SECRET` — required, otherwise `vercel.json`'s daily
+  `GET /api/cron/recurring` job is refused; Vercel Cron sends it as
+  `Authorization: Bearer <CRON_SECRET>`.
+
+### 3. Flutter app
+
+```bash
+cd mobile
+flutter build apk --dart-define=API_URL=https://<your-api>.vercel.app/api   # Android
+flutter build web --dart-define=API_URL=https://<your-api>.vercel.app/api   # web
+```
+
+`mobile/build/web` is a static bundle, so it can be served by Vercel, Netlify or
+Firebase Hosting. Native builds are distributed through the Play Store / App Store.
 
 ## Features
 
