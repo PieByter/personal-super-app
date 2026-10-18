@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { projectTasks, projects } from "@/db/schema";
+import { projectTasks, projects, projectMilestones } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { projectTaskSchema } from "@/lib/validation";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -28,6 +29,12 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = projectTaskSchema.parse(body);
+        if (!(await ownsRecord(projects, user.userId, data.projectId))) {
+            return Response.json({ error: "Project not found" }, { status: 404 });
+        }
+        if (data.milestoneId && !(await ownsRecord(projectMilestones, user.userId, data.milestoneId))) {
+            return Response.json({ error: "Milestone not found" }, { status: 404 });
+        }
         const [row] = await db.insert(projectTasks).values({ projectId: data.projectId, milestoneId: data.milestoneId, title: data.title, description: data.description, status: data.status, priority: data.priority, dueDate: data.dueDate, tags: data.tags }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }
@@ -41,6 +48,9 @@ export async function PUT(req: NextRequest) {
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
         const body = await req.json();
         const data = projectTaskSchema.parse(body);
+        if (data.milestoneId && !(await ownsRecord(projectMilestones, user.userId, data.milestoneId))) {
+            return Response.json({ error: "Milestone not found" }, { status: 404 });
+        }
         const [updated] = await db.update(projectTasks).set({ milestoneId: data.milestoneId, title: data.title, description: data.description, status: data.status, priority: data.priority, dueDate: data.dueDate, tags: data.tags, updatedAt: new Date() }).from(projects).where(and(eq(projectTasks.id, id), eq(projectTasks.projectId, projects.id), eq(projects.userId, user.userId))).returning();
         if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
         return Response.json(updated);

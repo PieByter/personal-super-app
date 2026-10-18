@@ -55,7 +55,7 @@ class _JournalEntryFormScreenState extends State<JournalEntryFormScreen> {
     try {
       final e = widget.entry;
       if (e != null) {
-        await ApiService().put('${ApiConstants.journalUrl}/${e.id}', body);
+        await ApiService().put('${ApiConstants.journalUrl}?id=${e.id}', body);
       } else {
         await ApiService().post(ApiConstants.journalUrl, body);
       }

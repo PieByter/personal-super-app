@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import { habits, habitLogs } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, inArray } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -18,10 +18,13 @@ export async function GET(req: NextRequest) {
     since.setDate(since.getDate() - 90);
     const sinceStr = since.toISOString().split("T")[0];
 
-    const logs = await db
-        .select()
-        .from(habitLogs)
-        .where(and(gte(habitLogs.logDate, sinceStr)));
+    const habitIds = userHabits.map((h) => h.id);
+    const logs = habitIds.length === 0
+        ? []
+        : await db
+            .select()
+            .from(habitLogs)
+            .where(and(inArray(habitLogs.habitId, habitIds), gte(habitLogs.logDate, sinceStr)));
 
     const logsByHabit = new Map<string, Set<string>>();
     for (const log of logs) {

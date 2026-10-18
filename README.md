@@ -93,6 +93,23 @@ psql -d your_database -f database/schema.sql
 | `/api/inventory` | GET/POST | Inventory items |
 | `/api/bookmarks` | GET/POST | Bookmarks |
 
+### API Conventions
+
+All endpoints follow the same shape — clients must match it exactly:
+
+- **Update / delete** take the id as a query parameter: `PUT /api/<module>?id=<uuid>`,
+  `DELETE /api/<module>?id=<uuid>`.
+- **Child resources** use the parent id as a query parameter on the collection
+  route: `GET /api/projects/tasks?projectId=<uuid>`, and the same id goes in the
+  request body when creating: `POST /api/projects/tasks` with `{ "projectId": "<uuid>" }`.
+- **Pagination** is opt-in: `?page=1&pageSize=20` returns
+  `{ data, total, page, pageSize, totalPages }`. Without `page`, the endpoint
+  returns the plain array.
+- **Auth**: every request except `/api/auth/*` needs `Authorization: Bearer <accessToken>`.
+  Tokens are verified in `src/middleware.ts`, which runs on the Edge runtime and
+  therefore uses `lib/jwt-edge.ts` (WebCrypto) instead of `jsonwebtoken`.
+- Optional fields accept `null` (to clear a value) as well as being omitted.
+
 ## Deployment
 
 ### Backend to Vercel

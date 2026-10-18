@@ -61,7 +61,7 @@ class _HabitFormScreenState extends State<HabitFormScreen> {
     try {
       final h = widget.habit;
       if (h != null) {
-        await ApiService().put('${ApiConstants.habitsUrl}/${h.id}', body);
+        await ApiService().put('${ApiConstants.habitsUrl}?id=${h.id}', body);
       } else {
         await ApiService().post(ApiConstants.habitsUrl, body);
       }

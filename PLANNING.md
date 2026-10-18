@@ -113,16 +113,16 @@ Tabel di bawah bisa dipakai sebagai referensi isi data / tampilan UI:
 
 ## 5. Langkah Implementasi
 
-- [ ] 1. Tambah enum `website_status` + tabel `job_websites` di `backend/src/db/schema.ts`
-- [ ] 2. Tambah kolom `websiteId` di tabel `job_applications`
-- [ ] 3. Generate & jalankan migrasi Drizzle (`npm run db:migrate`)
-- [ ] 4. Buat route `/api/jobs/websites` (CRUD + filter userId)
-- [ ] 5. Buat model `JobWebsite` di `mobile/lib/domain/models/`
-- [ ] 6. Buat screen list + form di `mobile/lib/presentation/modules/jobs/`
-- [ ] 7. Wire navigasi dari `jobs_screen.dart` (tab / menu "Websites")
-- [ ] 8. Tambahkan dropdown pilih website di form lamaran (`job_form_screen.dart`)
-- [ ] 9. Update `database/schema.sql` agar sinkron
-- [ ] 10. Update README (daftar endpoint & modul)
+- [x]  Tambah enum `website_status` + tabel `job_websites` di `backend/src/db/schema.ts`
+- [x]  Tambah kolom `websiteId` di tabel `job_applications`
+- [x]  Generate & jalankan migrasi Drizzle (`npm run db:migrate`)
+- [x]  Buat route `/api/jobs/websites` (CRUD + filter userId)
+- [x]  Buat model `JobWebsite` di `mobile/lib/domain/models/`
+- [x]  Buat screen list + form di `mobile/lib/presentation/modules/jobs/`
+- [x]  Wire navigasi dari `jobs_screen.dart` (tab / menu "Websites")
+- [x]  Tambahkan dropdown pilih website di form lamaran (`job_form_screen.dart`)
+- [x]  Update `database/schema.sql` agar sinkron
+- [x]  Update README (daftar endpoint & modul)
 
 ---
 

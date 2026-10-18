@@ -32,7 +32,7 @@ class _ProjectTasksScreenState extends State<ProjectTasksScreen> {
   Future<void> _loadTasks() async {
     try {
       final response = await ApiService()
-          .get('${ApiConstants.projectsUrl}/${widget.project.id}/tasks');
+          .get('${ApiConstants.projectsUrl}/tasks?projectId=${widget.project.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _tasks = data.map((e) => ProjectTask.fromJson(e)).toList();
@@ -49,8 +49,8 @@ class _ProjectTasksScreenState extends State<ProjectTasksScreen> {
   Future<void> _addTask() async {
     if (_titleController.text.isEmpty) return;
     try {
-      await ApiService()
-          .post('${ApiConstants.projectsUrl}/${widget.project.id}/tasks', {
+      await ApiService().post('${ApiConstants.projectsUrl}/tasks', {
+        'projectId': widget.project.id,
         'title': _titleController.text,
         'description': _descriptionController.text,
         'status': _status,

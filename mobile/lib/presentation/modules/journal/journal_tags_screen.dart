@@ -60,7 +60,7 @@ class _JournalTagsScreenState extends State<JournalTagsScreen> {
 
   Future<void> _deleteTag(String id) async {
     try {
-      await ApiService().delete('${ApiConstants.journalUrl}/tags/$id');
+      await ApiService().delete('${ApiConstants.journalUrl}/tags?id=$id');
       _loadTags();
     } catch (e) {
       if (mounted) {

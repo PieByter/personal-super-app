@@ -5,6 +5,7 @@ import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { transactionSchema } from "@/lib/validation";
 import { getPagination, paginateResponse } from "@/lib/pagination";
 import { eq, and, desc, gte, lte, count } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -68,6 +69,10 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const data = transactionSchema.parse(body);
 
+        if (data.categoryId && !(await ownsRecord(financeCategories, user.userId, data.categoryId))) {
+            return Response.json({ error: "Category not found" }, { status: 404 });
+        }
+
         const [transaction] = await db
             .insert(financeTransactions)
             .values({
@@ -99,6 +104,10 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json();
         const data = transactionSchema.parse(body);
+
+        if (data.categoryId && !(await ownsRecord(financeCategories, user.userId, data.categoryId))) {
+            return Response.json({ error: "Category not found" }, { status: 404 });
+        }
 
         const [updated] = await db
             .update(financeTransactions)

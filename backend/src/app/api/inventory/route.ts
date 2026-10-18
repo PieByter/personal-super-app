@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { inventoryItems } from "@/db/schema";
+import { inventoryItems, inventoryCategories } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { inventoryItemSchema } from "@/lib/validation";
 import { getPagination, paginateResponse } from "@/lib/pagination";
 import { eq, and, desc, count } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = inventoryItemSchema.parse(body);
+
+        if (data.categoryId && !(await ownsRecord(inventoryCategories, user.userId, data.categoryId))) {
+            return Response.json({ error: "Category not found" }, { status: 404 });
+        }
 
         const [entry] = await db
             .insert(inventoryItems)
@@ -78,6 +83,10 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json();
         const data = inventoryItemSchema.parse(body);
+
+        if (data.categoryId && !(await ownsRecord(inventoryCategories, user.userId, data.categoryId))) {
+            return Response.json({ error: "Category not found" }, { status: 404 });
+        }
 
         const [updated] = await db
             .update(inventoryItems)

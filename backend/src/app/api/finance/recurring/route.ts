@@ -1,9 +1,9 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { financeRecurringRules, financeTransactions } from "@/db/schema";
+import { financeRecurringRules } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { getPagination, paginateResponse } from "@/lib/pagination";
-import { eq, and, desc, count, lte } from "drizzle-orm";
+import { eq, and, desc, count } from "drizzle-orm";
 import { z } from "zod";
 import { apiError } from "@/lib/api-error";
 
@@ -126,80 +126,3 @@ export async function DELETE(req: NextRequest) {
     }
 }
 
-/**
- * Processes all due recurring rules and generates transactions.
- * Pass a userId to process only that user; pass null to process everyone
- * (used by the scheduled cron).
- */
-export async function processDueRules(userId: string | null) {
-    const now = new Date();
-    const today = now.toISOString().split("T")[0];
-
-    const conditions = [
-        eq(financeRecurringRules.isActive, true),
-        lte(financeRecurringRules.nextExecution, today),
-    ];
-    if (userId) conditions.push(eq(financeRecurringRules.userId, userId));
-
-    const dueRules = await db
-        .select()
-        .from(financeRecurringRules)
-        .where(and(...conditions));
-
-    const created: typeof financeTransactions.$inferSelect[] = [];
-
-    for (const rule of dueRules) {
-        // Skip if the rule has ended.
-        if (rule.endDate && rule.nextExecution > rule.endDate) {
-            await db
-                .update(financeRecurringRules)
-                .set({ isActive: false })
-                .where(eq(financeRecurringRules.id, rule.id));
-            continue;
-        }
-
-        const [tx] = await db
-            .insert(financeTransactions)
-            .values({
-                userId: rule.userId,
-                categoryId: rule.categoryId,
-                amount: rule.amount,
-                type: rule.type,
-                description: rule.description || `Recurring ${rule.frequency}`,
-                transactionDate: rule.nextExecution,
-                isRecurring: true,
-                recurringRuleId: rule.id,
-            })
-            .returning();
-        created.push(tx);
-
-        // Advance next execution.
-        const next = advanceDate(rule.nextExecution, rule.frequency, rule.interval ?? 1);
-        const nextExecution = rule.endDate && next > rule.endDate ? rule.endDate : next;
-        await db
-            .update(financeRecurringRules)
-            .set({ nextExecution })
-            .where(eq(financeRecurringRules.id, rule.id));
-    }
-
-    return created;
-}
-
-function advanceDate(dateStr: string, frequency: string, interval: number): string {
-    const d = new Date(dateStr + "T00:00:00");
-    switch (frequency) {
-        case "daily":
-            d.setDate(d.getDate() + interval);
-            break;
-        case "weekly":
-            d.setDate(d.getDate() + 7 * interval);
-            break;
-        case "monthly":
-            d.setMonth(d.getMonth() + interval);
-            break;
-        case "yearly":
-            d.setFullYear(d.getFullYear() + interval);
-            break;
-    }
-    return d.toISOString().split("T")[0];
-}

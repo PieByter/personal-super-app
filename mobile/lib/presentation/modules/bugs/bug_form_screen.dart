@@ -58,7 +58,7 @@ class _BugFormScreenState extends State<BugFormScreen> {
     try {
       final b = widget.bug;
       if (b != null) {
-        await ApiService().put('${ApiConstants.bugsUrl}/${b.id}', body);
+        await ApiService().put('${ApiConstants.bugsUrl}?id=${b.id}', body);
       } else {
         await ApiService().post(ApiConstants.bugsUrl, body);
       }

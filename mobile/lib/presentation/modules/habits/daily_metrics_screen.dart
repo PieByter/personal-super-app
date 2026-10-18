@@ -118,7 +118,7 @@ class _DailyMetricsScreenState extends State<DailyMetricsScreen> {
     try {
       if (_metric != null) {
         await ApiService()
-            .put('${ApiConstants.habitsUrl}/metrics/${_metric!.id}', body);
+            .put('${ApiConstants.habitsUrl}/metrics?id=${_metric!.id}', body);
       } else {
         await ApiService().post('${ApiConstants.habitsUrl}/metrics', body);
       }

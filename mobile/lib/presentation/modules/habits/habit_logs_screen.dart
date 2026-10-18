@@ -54,7 +54,7 @@ class _HabitLogsScreenState extends State<HabitLogsScreen> {
   Future<void> _loadLogs() async {
     try {
       final response = await ApiService()
-          .get('${ApiConstants.habitsUrl}/${widget.habit.id}/logs');
+          .get('${ApiConstants.habitsUrl}/logs?habitId=${widget.habit.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _logs = data.map((e) => HabitLog.fromJson(e)).toList();
@@ -70,8 +70,8 @@ class _HabitLogsScreenState extends State<HabitLogsScreen> {
 
   Future<void> _addLog() async {
     try {
-      await ApiService()
-          .post('${ApiConstants.habitsUrl}/${widget.habit.id}/logs', {
+      await ApiService().post('${ApiConstants.habitsUrl}/logs', {
+        'habitId': widget.habit.id,
         'logDate': _logDate.toIso8601String().split('T')[0],
         'value': _valueController.text,
         'notes': _notesController.text,

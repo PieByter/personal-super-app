@@ -102,7 +102,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     try {
       final j = widget.job;
       if (j != null) {
-        await ApiService().put('${ApiConstants.jobsUrl}/${j.id}', body);
+        await ApiService().put('${ApiConstants.jobsUrl}?id=${j.id}', body);
       } else {
         await ApiService().post(ApiConstants.jobsUrl, body);
       }

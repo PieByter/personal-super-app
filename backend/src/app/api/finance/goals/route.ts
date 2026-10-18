@@ -10,7 +10,7 @@ const goalSchema = z.object({
     name: z.string().min(1),
     targetAmount: z.string().or(z.number()),
     currentAmount: z.string().or(z.number()).optional(),
-    deadline: z.string().optional(),
+    deadline: z.string().optional().nullable(),
     color: z.string().optional(),
     icon: z.string().optional(),
     isActive: z.boolean().optional(),

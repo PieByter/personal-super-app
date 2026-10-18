@@ -36,7 +36,7 @@ class _JobInterviewsScreenState extends State<JobInterviewsScreen> {
   Future<void> _loadInterviews() async {
     try {
       final response = await ApiService()
-          .get('${ApiConstants.jobsUrl}/${widget.job.id}/interviews');
+          .get('${ApiConstants.jobsUrl}/interviews?jobId=${widget.job.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _interviews = data.map((e) => Interview.fromJson(e)).toList();
@@ -53,8 +53,8 @@ class _JobInterviewsScreenState extends State<JobInterviewsScreen> {
   Future<void> _addInterview() async {
     if (_typeController.text.isEmpty) return;
     try {
-      await ApiService()
-          .post('${ApiConstants.jobsUrl}/${widget.job.id}/interviews', {
+      await ApiService().post('${ApiConstants.jobsUrl}/interviews', {
+        'jobId': widget.job.id,
         'round': _round,
         'interviewType': _typeController.text,
         'scheduledAt': _scheduledAt.toIso8601String(),

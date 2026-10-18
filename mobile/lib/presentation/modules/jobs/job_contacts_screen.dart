@@ -32,7 +32,7 @@ class _JobContactsScreenState extends State<JobContactsScreen> {
   Future<void> _loadContacts() async {
     try {
       final response = await ApiService()
-          .get('${ApiConstants.jobsUrl}/${widget.job.id}/contacts');
+          .get('${ApiConstants.jobsUrl}/contacts?jobId=${widget.job.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _contacts = data.map((e) => JobContact.fromJson(e)).toList();
@@ -49,8 +49,8 @@ class _JobContactsScreenState extends State<JobContactsScreen> {
   Future<void> _addContact() async {
     if (_nameController.text.isEmpty) return;
     try {
-      await ApiService()
-          .post('${ApiConstants.jobsUrl}/${widget.job.id}/contacts', {
+      await ApiService().post('${ApiConstants.jobsUrl}/contacts', {
+        'jobId': widget.job.id,
         'name': _nameController.text,
         'role': _roleController.text,
         'email': _emailController.text,

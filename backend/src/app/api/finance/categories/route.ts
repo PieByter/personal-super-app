@@ -4,6 +4,7 @@ import { financeCategories } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { categorySchema } from "@/lib/validation";
 import { eq, and, desc } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -19,6 +20,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = categorySchema.parse(body);
+        if (data.parentId && !(await ownsRecord(financeCategories, user.userId, data.parentId))) {
+            return Response.json({ error: "Parent category not found" }, { status: 404 });
+        }
         const [row] = await db.insert(financeCategories).values({ userId: user.userId, name: data.name, type: data.type, color: data.color, icon: data.icon, parentId: data.parentId }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

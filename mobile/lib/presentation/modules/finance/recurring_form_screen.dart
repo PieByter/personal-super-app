@@ -71,7 +71,7 @@ class _RecurringFormScreenState extends State<RecurringFormScreen> {
     try {
       final r = widget.rule;
       if (r != null) {
-        await ApiService().put('${ApiConstants.recurringUrl}/${r.id}', body);
+        await ApiService().put('${ApiConstants.recurringUrl}?id=${r.id}', body);
       } else {
         await ApiService().post(ApiConstants.recurringUrl, body);
       }

@@ -5,6 +5,7 @@ import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { journalEntrySchema } from "@/lib/validation";
 import { getPagination, paginateResponse } from "@/lib/pagination";
 import { eq, and, desc, count } from "drizzle-orm";
+import { ownsRecord, ownsRecords } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -56,6 +57,9 @@ export async function POST(req: NextRequest) {
             .returning();
 
         if (data.tagIds && data.tagIds.length > 0) {
+            if (!(await ownsRecords(journalTags, user.userId, data.tagIds))) {
+                return Response.json({ error: "Tag not found" }, { status: 404 });
+            }
             await db.insert(journalEntryTags).values(
                 data.tagIds.map((tagId) => ({ journalId: entry.id, tagId }))
             );
@@ -111,6 +115,10 @@ export async function DELETE(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const id = searchParams.get("id");
         if (!id) return Response.json({ error: "ID required" }, { status: 400 });
+
+        if (!(await ownsRecord(journalEntries, user.userId, id))) {
+            return Response.json({ error: "Not found" }, { status: 404 });
+        }
 
         await db.delete(journalEntryTags).where(eq(journalEntryTags.journalId, id));
         await db.delete(journalEntries).where(and(eq(journalEntries.id, id), eq(journalEntries.userId, user.userId)));

@@ -65,7 +65,7 @@ class _BudgetFormScreenState extends State<BudgetFormScreen> {
     try {
       final b = widget.budget;
       if (b != null) {
-        await ApiService().put('${ApiConstants.budgetsUrl}/${b.id}', body);
+        await ApiService().put('${ApiConstants.budgetsUrl}?id=${b.id}', body);
       } else {
         await ApiService().post(ApiConstants.budgetsUrl, body);
       }

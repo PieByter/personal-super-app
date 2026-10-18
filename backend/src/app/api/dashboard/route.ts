@@ -19,33 +19,12 @@ export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
     if (!user) return unauthorizedResponse();
 
-    // Admin dashboard - return system-wide stats
-    if (user.role === "admin") {
-        const [userCount] = await db.select({ total: count(users.id) }).from(users);
-        const [totalTransactions] = await db.select({ total: count(financeTransactions.id) }).from(financeTransactions);
-        const [totalProjects] = await db.select({ total: count(projects.id) }).from(projects);
-        const [totalTasks] = await db.select({ total: count(projectTasks.id) }).from(projectTasks);
-        const [totalHabits] = await db.select({ total: count(habits.id) }).from(habits);
-        const [totalJobs] = await db.select({ total: count(jobApplications.id) }).from(jobApplications);
-        const [totalBugs] = await db.select({ total: count(bugEntries.id) }).from(bugEntries);
-        const [totalSubscriptions] = await db.select({ total: count(subscriptions.id) }).from(subscriptions);
+    const isAdmin = user.role === "admin";
 
-        return Response.json({
-            isAdmin: true,
-            systemStats: {
-                totalUsers: userCount?.total || 0,
-                totalTransactions: totalTransactions?.total || 0,
-                totalProjects: totalProjects?.total || 0,
-                totalTasks: totalTasks?.total || 0,
-                totalHabits: totalHabits?.total || 0,
-                totalJobs: totalJobs?.total || 0,
-                totalBugs: totalBugs?.total || 0,
-                totalSubscriptions: totalSubscriptions?.total || 0,
-            },
-        });
-    }
+    // Admins additionally get system-wide counts for the admin console,
+    // but still receive their own personal dashboard below.
+    const systemStats = isAdmin ? await getSystemStats() : null;
 
-    // Regular user dashboard
     const now = new Date();
     const monthStart = startOfMonth(now);
     const weekAgo = subDays(now, 7);
@@ -159,7 +138,8 @@ export async function GET(req: NextRequest) {
     ]);
 
     return Response.json({
-        isAdmin: false,
+        isAdmin,
+        ...(systemStats ? { systemStats } : {}),
         finance: {
             monthIncome: incomeRow?.total || "0",
             monthExpense: expenseRow?.total || "0",
@@ -173,4 +153,38 @@ export async function GET(req: NextRequest) {
             monthlyCost: subSummary?.monthlyCost || "0",
         },
     });
+}
+
+/** System-wide counts for the admin console. */
+async function getSystemStats() {
+    const [
+        [userCount],
+        [totalTransactions],
+        [totalProjects],
+        [totalTasks],
+        [totalHabits],
+        [totalJobs],
+        [totalBugs],
+        [totalSubscriptions],
+    ] = await Promise.all([
+        db.select({ total: count(users.id) }).from(users),
+        db.select({ total: count(financeTransactions.id) }).from(financeTransactions),
+        db.select({ total: count(projects.id) }).from(projects),
+        db.select({ total: count(projectTasks.id) }).from(projectTasks),
+        db.select({ total: count(habits.id) }).from(habits),
+        db.select({ total: count(jobApplications.id) }).from(jobApplications),
+        db.select({ total: count(bugEntries.id) }).from(bugEntries),
+        db.select({ total: count(subscriptions.id) }).from(subscriptions),
+    ]);
+
+    return {
+        totalUsers: userCount?.total || 0,
+        totalTransactions: totalTransactions?.total || 0,
+        totalProjects: totalProjects?.total || 0,
+        totalTasks: totalTasks?.total || 0,
+        totalHabits: totalHabits?.total || 0,
+        totalJobs: totalJobs?.total || 0,
+        totalBugs: totalBugs?.total || 0,
+        totalSubscriptions: totalSubscriptions?.total || 0,
+    };
 }

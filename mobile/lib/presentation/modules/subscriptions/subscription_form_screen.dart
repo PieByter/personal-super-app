@@ -91,7 +91,7 @@ class _SubscriptionFormScreenState extends State<SubscriptionFormScreen> {
       final s = widget.subscription;
       if (s != null) {
         await ApiService()
-            .put('${ApiConstants.subscriptionsUrl}/${s.id}', body);
+            .put('${ApiConstants.subscriptionsUrl}?id=${s.id}', body);
       } else {
         await ApiService().post(ApiConstants.subscriptionsUrl, body);
       }

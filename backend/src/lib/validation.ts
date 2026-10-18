@@ -76,7 +76,7 @@ export const jobApplicationSchema = z.object({
     jobDescription: z.string().max(20000).optional(),
     notes: z.string().max(5000).optional(),
     url: z.string().url().max(2048).optional(),
-    websiteId: z.string().uuid().optional(),
+    websiteId: z.string().uuid().optional().nullable(),
 });
 
 // Project
@@ -85,8 +85,8 @@ export const projectSchema = z.object({
     description: z.string().max(5000).optional(),
     goal: z.string().max(5000).optional(),
     priority: z.enum(["low", "medium", "high"]).optional(),
-    startDate: z.string().optional(),
-    targetDate: z.string().optional(),
+    startDate: z.string().optional().nullable(),
+    targetDate: z.string().optional().nullable(),
     techStack: z.array(z.string().max(50)).max(30).optional(),
     gitRepository: z.string().max(2048).optional(),
     color: z.string().max(7).optional(),
@@ -99,7 +99,7 @@ export const projectTaskSchema = z.object({
     description: z.string().max(5000).optional(),
     status: z.enum(["todo", "in_progress", "review", "done"]).optional(),
     priority: z.enum(["low", "medium", "high"]).optional(),
-    dueDate: z.string().optional(),
+    dueDate: z.string().optional().nullable(),
     tags: z.array(z.string().max(50)).max(20).optional(),
 });
 
@@ -147,8 +147,8 @@ export const subscriptionSchema = z.object({
     amount: z.string().or(z.number()),
     currency: z.string().max(10).optional(),
     billingCycle: z.enum(["weekly", "monthly", "quarterly", "yearly", "lifetime"]),
-    nextRenewalDate: z.string().optional(),
-    startDate: z.string().optional(),
+    nextRenewalDate: z.string().optional().nullable(),
+    startDate: z.string().optional().nullable(),
     paymentMethod: z.string().max(100).optional(),
     reminderDays: z.number().optional(),
 });
@@ -161,12 +161,12 @@ export const inventoryItemSchema = z.object({
     brand: z.string().max(100).optional(),
     model: z.string().max(100).optional(),
     serialNumber: z.string().max(100).optional(),
-    purchaseDate: z.string().optional(),
+    purchaseDate: z.string().optional().nullable(),
     purchasePrice: z.number().or(z.string()).optional(),
     currentValue: z.number().or(z.string()).optional(),
     condition: z.enum(["excellent", "good", "fair", "poor", "broken"]).optional(),
     location: z.string().max(255).optional(),
-    warrantyExpiry: z.string().optional(),
+    warrantyExpiry: z.string().optional().nullable(),
     tags: z.array(z.string().max(50)).max(20).optional(),
     photoUrls: z.array(z.string().url().max(2048)).max(5).optional(),
 });

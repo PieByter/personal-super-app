@@ -54,7 +54,7 @@ class _GoalFormScreenState extends State<GoalFormScreen> {
     try {
       final g = widget.goal;
       if (g != null) {
-        await ApiService().put('${ApiConstants.goalsUrl}/${g.id}', body);
+        await ApiService().put('${ApiConstants.goalsUrl}?id=${g.id}', body);
       } else {
         await ApiService().post(ApiConstants.goalsUrl, body);
       }

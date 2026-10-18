@@ -4,6 +4,7 @@ import { bookmarkCollections } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 const collectionSchema = z.object({
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = collectionSchema.parse(body);
+        if (data.parentId && !(await ownsRecord(bookmarkCollections, user.userId, data.parentId))) {
+            return Response.json({ error: "Parent collection not found" }, { status: 404 });
+        }
         const [row] = await db.insert(bookmarkCollections).values({ userId: user.userId, name: data.name, description: data.description, color: data.color, icon: data.icon, parentId: data.parentId }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

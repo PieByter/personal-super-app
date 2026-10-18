@@ -34,3 +34,6 @@ yarn-error.log*
 
 # Drizzle
 drizzle/
+
+# TypeScript build cache
+*.tsbuildinfo

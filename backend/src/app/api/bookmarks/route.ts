@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { bookmarks } from "@/db/schema";
+import { bookmarks, bookmarkCollections } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { bookmarkSchema } from "@/lib/validation";
 import { getPagination, paginateResponse } from "@/lib/pagination";
 import { eq, and, desc, count } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -40,6 +41,10 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const data = bookmarkSchema.parse(body);
 
+        if (data.collectionId && !(await ownsRecord(bookmarkCollections, user.userId, data.collectionId))) {
+            return Response.json({ error: "Collection not found" }, { status: 404 });
+        }
+
         const [entry] = await db
             .insert(bookmarks)
             .values({
@@ -72,6 +77,10 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json();
         const data = bookmarkSchema.parse(body);
+
+        if (data.collectionId && !(await ownsRecord(bookmarkCollections, user.userId, data.collectionId))) {
+            return Response.json({ error: "Collection not found" }, { status: 404 });
+        }
 
         const [updated] = await db
             .update(bookmarks)

@@ -73,7 +73,7 @@ class _InvestmentFormScreenState extends State<InvestmentFormScreen> {
     try {
       final i = widget.investment;
       if (i != null) {
-        await ApiService().put('${ApiConstants.investmentsUrl}/${i.id}', body);
+        await ApiService().put('${ApiConstants.investmentsUrl}?id=${i.id}', body);
       } else {
         await ApiService().post(ApiConstants.investmentsUrl, body);
       }

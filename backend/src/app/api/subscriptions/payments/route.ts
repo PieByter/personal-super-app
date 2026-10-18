@@ -4,6 +4,7 @@ import { subscriptionPayments, subscriptions } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 const paymentSchema = z.object({
@@ -35,6 +36,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = paymentSchema.parse(body);
+        if (!(await ownsRecord(subscriptions, user.userId, data.subscriptionId))) {
+            return Response.json({ error: "Subscription not found" }, { status: 404 });
+        }
         const [row] = await db.insert(subscriptionPayments).values({ subscriptionId: data.subscriptionId, amount: data.amount.toString(), paymentDate: data.paymentDate, notes: data.notes }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

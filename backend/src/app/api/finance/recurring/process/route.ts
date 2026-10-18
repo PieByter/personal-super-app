@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
-import { processDueRules } from "../route";
+import { processDueRules } from "@/lib/recurring";
 
 export async function POST(req: NextRequest) {
     const user = getAuthUser(req);

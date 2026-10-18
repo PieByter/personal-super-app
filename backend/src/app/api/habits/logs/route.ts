@@ -4,6 +4,7 @@ import { habitLogs, habits } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { habitLogSchema } from "@/lib/validation";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -28,6 +29,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = habitLogSchema.parse(body);
+        if (!(await ownsRecord(habits, user.userId, data.habitId))) {
+            return Response.json({ error: "Habit not found" }, { status: 404 });
+        }
         const [row] = await db.insert(habitLogs).values({ habitId: data.habitId, logDate: data.logDate, value: data.value?.toString(), notes: data.notes, mood: data.mood }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

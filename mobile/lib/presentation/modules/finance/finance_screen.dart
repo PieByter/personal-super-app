@@ -362,8 +362,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                               SlidableAction(
                                 onPressed: (_) => _confirmDelete(
                                   title: t.description ?? 'transaction',
-                                  url:
-                                      '${ApiConstants.transactionsUrl}/${t.id}',
+                                  url: '${ApiConstants.transactionsUrl}?id=${t.id}',
                                 ),
                                 backgroundColor: AppColors.bugs,
                                 foregroundColor: Colors.white,
@@ -493,7 +492,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                                 ),
                                 onPressed: () => _confirmDelete(
                                   title: r.description ?? 'recurring rule',
-                                  url: '${ApiConstants.recurringUrl}/${r.id}',
+                                  url: '${ApiConstants.recurringUrl}?id=${r.id}',
                                 ),
                               ),
                             ],
@@ -573,7 +572,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                     icon: const Icon(Icons.delete_outline, color: Colors.red),
                     onPressed: () => _confirmDelete(
                       title: '${b.period} budget',
-                      url: '${ApiConstants.budgetsUrl}/${b.id}',
+                      url: '${ApiConstants.budgetsUrl}?id=${b.id}',
                     ),
                   ),
                 ],
@@ -625,7 +624,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                         ),
                         onPressed: () => _confirmDelete(
                           title: g.name,
-                          url: '${ApiConstants.goalsUrl}/${g.id}',
+                          url: '${ApiConstants.goalsUrl}?id=${g.id}',
                         ),
                       ),
                     ],
@@ -753,7 +752,7 @@ class _FinanceScreenState extends State<FinanceScreen>
                               color: Colors.red),
                           onPressed: () => _confirmDelete(
                             title: inv.name,
-                            url: '${ApiConstants.investmentsUrl}/${inv.id}',
+                            url: '${ApiConstants.investmentsUrl}?id=${inv.id}',
                           ),
                         ),
                       ],

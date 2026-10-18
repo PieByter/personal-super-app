@@ -116,7 +116,7 @@ class _InventoryItemFormScreenState extends State<InventoryItemFormScreen> {
     try {
       final i = widget.item;
       if (i != null) {
-        await ApiService().put('${ApiConstants.inventoryUrl}/${i.id}', body);
+        await ApiService().put('${ApiConstants.inventoryUrl}?id=${i.id}', body);
       } else {
         await ApiService().post(ApiConstants.inventoryUrl, body);
       }

@@ -1,17 +1,18 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { financeBudgets } from "@/db/schema";
+import { financeBudgets, financeCategories } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, desc } from "drizzle-orm";
 import { z } from "zod";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 const budgetSchema = z.object({
-    categoryId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional().nullable(),
     amount: z.string().or(z.number()),
     period: z.enum(["weekly", "monthly", "yearly"]),
     startDate: z.string(),
-    endDate: z.string().optional(),
+    endDate: z.string().optional().nullable(),
     alertThreshold: z.string().or(z.number()).optional(),
     isActive: z.boolean().optional(),
 });
@@ -29,6 +30,11 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = budgetSchema.parse(body);
+
+        if (data.categoryId && !(await ownsRecord(financeCategories, user.userId, data.categoryId))) {
+            return Response.json({ error: "Category not found" }, { status: 404 });
+        }
+
         const [row] = await db.insert(financeBudgets).values({ userId: user.userId, categoryId: data.categoryId, amount: data.amount.toString(), period: data.period, startDate: data.startDate, endDate: data.endDate, alertThreshold: data.alertThreshold?.toString(), isActive: data.isActive }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

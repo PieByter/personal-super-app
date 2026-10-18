@@ -33,7 +33,7 @@ class _SubscriptionPaymentsScreenState
   Future<void> _loadPayments() async {
     try {
       final response = await ApiService().get(
-          '${ApiConstants.subscriptionsUrl}/${widget.subscription.id}/payments');
+          '${ApiConstants.subscriptionsUrl}/payments?subscriptionId=${widget.subscription.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _payments = data.map((e) => SubscriptionPayment.fromJson(e)).toList();
@@ -50,13 +50,12 @@ class _SubscriptionPaymentsScreenState
   Future<void> _addPayment() async {
     if (_amountController.text.isEmpty) return;
     try {
-      await ApiService().post(
-          '${ApiConstants.subscriptionsUrl}/${widget.subscription.id}/payments',
-          {
-            'amount': _amountController.text,
-            'paymentDate': _paymentDate.toIso8601String().split('T')[0],
-            'notes': _notesController.text,
-          });
+      await ApiService().post('${ApiConstants.subscriptionsUrl}/payments', {
+        'subscriptionId': widget.subscription.id,
+        'amount': _amountController.text,
+        'paymentDate': _paymentDate.toIso8601String().split('T')[0],
+        'notes': _notesController.text,
+      });
       _notesController.clear();
       _loadPayments();
     } catch (e) {

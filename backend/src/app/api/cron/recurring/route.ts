@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { processDueRules } from "../../finance/recurring/route";
+import { processDueRules } from "@/lib/recurring";
 
 /**
  * Scheduled cron endpoint (Vercel Cron) that processes due recurring

@@ -44,7 +44,7 @@ class _FinanceCategoryFormScreenState extends State<FinanceCategoryFormScreen> {
     try {
       final c = widget.category;
       if (c != null) {
-        await ApiService().put('${ApiConstants.categoriesUrl}/${c.id}', body);
+        await ApiService().put('${ApiConstants.categoriesUrl}?id=${c.id}', body);
       } else {
         await ApiService().post(ApiConstants.categoriesUrl, body);
       }

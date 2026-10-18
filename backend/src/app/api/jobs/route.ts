@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { jobApplications } from "@/db/schema";
+import { jobApplications, jobWebsites } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { jobApplicationSchema } from "@/lib/validation";
 import { getPagination, paginateResponse } from "@/lib/pagination";
 import { eq, and, desc, count } from "drizzle-orm";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 export async function GET(req: NextRequest) {
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = jobApplicationSchema.parse(body);
+
+        if (data.websiteId && !(await ownsRecord(jobWebsites, user.userId, data.websiteId))) {
+            return Response.json({ error: "Website not found" }, { status: 404 });
+        }
 
         const [entry] = await db
             .insert(jobApplications)
@@ -75,6 +80,10 @@ export async function PUT(req: NextRequest) {
 
         const body = await req.json();
         const data = jobApplicationSchema.parse(body);
+
+        if (data.websiteId && !(await ownsRecord(jobWebsites, user.userId, data.websiteId))) {
+            return Response.json({ error: "Website not found" }, { status: 404 });
+        }
 
         const [updated] = await db
             .update(jobApplications)

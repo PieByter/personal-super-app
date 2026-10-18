@@ -93,7 +93,7 @@ class _ProjectFormScreenState extends State<ProjectFormScreen> {
     try {
       final p = widget.project;
       if (p != null) {
-        await ApiService().put('${ApiConstants.projectsUrl}/${p.id}', body);
+        await ApiService().put('${ApiConstants.projectsUrl}?id=${p.id}', body);
       } else {
         await ApiService().post(ApiConstants.projectsUrl, body);
       }

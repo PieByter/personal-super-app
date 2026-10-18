@@ -33,7 +33,9 @@ export function rateLimit(
         req.headers.get("x-real-ip") ||
         "unknown";
 
-    const key = `${ip}`;
+    // Scope the bucket per endpoint so routes with different limits don't
+    // consume each other's allowance.
+    const key = `${new URL(req.url).pathname}:${ip}`;
     const now = Date.now();
     const entry = store.get(key);
 

@@ -30,8 +30,8 @@ class _ProjectMilestonesScreenState extends State<ProjectMilestonesScreen> {
 
   Future<void> _loadMilestones() async {
     try {
-      final response = await ApiService()
-          .get('${ApiConstants.projectsUrl}/${widget.project.id}/milestones');
+      final response = await ApiService().get(
+          '${ApiConstants.projectsUrl}/milestones?projectId=${widget.project.id}');
       final List<dynamic> data = response is List ? response : [];
       setState(() {
         _milestones = data.map((e) => Milestone.fromJson(e)).toList();
@@ -48,8 +48,8 @@ class _ProjectMilestonesScreenState extends State<ProjectMilestonesScreen> {
   Future<void> _addMilestone() async {
     if (_titleController.text.isEmpty) return;
     try {
-      await ApiService()
-          .post('${ApiConstants.projectsUrl}/${widget.project.id}/milestones', {
+      await ApiService().post('${ApiConstants.projectsUrl}/milestones', {
+        'projectId': widget.project.id,
         'title': _titleController.text,
         'description': _descriptionController.text,
         'dueDate': _dueDate?.toIso8601String().split('T')[0],
@@ -78,11 +78,13 @@ class _ProjectMilestonesScreenState extends State<ProjectMilestonesScreen> {
 
   Future<void> _toggleComplete(Milestone m) async {
     try {
-      await ApiService().put(
-          '${ApiConstants.projectsUrl}/${widget.project.id}/milestones/${m.id}',
-          {
-            'isCompleted': !m.isCompleted,
-          });
+      await ApiService().put('${ApiConstants.projectsUrl}/milestones?id=${m.id}', {
+        'projectId': widget.project.id,
+        'title': m.title,
+        'description': m.description,
+        'dueDate': m.dueDate,
+        'isCompleted': !m.isCompleted,
+      });
       _loadMilestones();
     } catch (e) {
       if (mounted) {

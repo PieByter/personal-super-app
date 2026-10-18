@@ -4,13 +4,14 @@ import { projectMilestones, projects } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 const milestoneSchema = z.object({
     projectId: z.string().uuid(),
     title: z.string().min(1),
-    description: z.string().optional(),
-    dueDate: z.string().optional(),
+    description: z.string().optional().nullable(),
+    dueDate: z.string().optional().nullable(),
     isCompleted: z.boolean().optional(),
 });
 
@@ -36,6 +37,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = milestoneSchema.parse(body);
+        if (!(await ownsRecord(projects, user.userId, data.projectId))) {
+            return Response.json({ error: "Project not found" }, { status: 404 });
+        }
         const [row] = await db.insert(projectMilestones).values({ projectId: data.projectId, title: data.title, description: data.description, dueDate: data.dueDate, isCompleted: data.isCompleted }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

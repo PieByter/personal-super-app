@@ -4,6 +4,7 @@ import { jobInterviews, jobApplications } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, desc, inArray, getTableColumns } from "drizzle-orm";
 import { z } from "zod";
+import { ownsRecord } from "@/lib/ownership";
 import { apiError } from "@/lib/api-error";
 
 const interviewSchema = z.object({
@@ -42,6 +43,9 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const data = interviewSchema.parse(body);
+        if (!(await ownsRecord(jobApplications, user.userId, data.jobId))) {
+            return Response.json({ error: "Job not found" }, { status: 404 });
+        }
         const [row] = await db.insert(jobInterviews).values({ jobId: data.jobId, round: data.round, interviewType: data.interviewType, scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null, durationMinutes: data.durationMinutes, location: data.location, meetingUrl: data.meetingUrl, interviewerName: data.interviewerName, interviewerEmail: data.interviewerEmail, notes: data.notes, status: data.status }).returning();
         return Response.json(row, { status: 201 });
     } catch (e) { return apiError(e); }

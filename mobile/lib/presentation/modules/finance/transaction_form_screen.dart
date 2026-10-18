@@ -58,7 +58,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       final t = widget.transaction;
       if (t != null) {
         await ApiService().put(
-          '${ApiConstants.transactionsUrl}/${t.id}',
+          '${ApiConstants.transactionsUrl}?id=${t.id}',
           body,
         );
       } else {

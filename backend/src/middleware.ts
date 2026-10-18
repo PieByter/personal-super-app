@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "./lib/auth";
+import { verifyAccessToken } from "./lib/jwt-edge";
 
 const PUBLIC_PATHS = ["/api/auth"];
 
@@ -21,7 +21,7 @@ function withCors(response: NextResponse): NextResponse {
     return response;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Handle CORS preflight requests.
@@ -40,15 +40,21 @@ export function middleware(request: NextRequest) {
         );
     }
 
+    const token = authHeader.substring(7);
     try {
-        const token = authHeader.substring(7);
-        verifyToken(token);
-        return withCors(NextResponse.next());
-    } catch {
+        if (!(await verifyAccessToken(token))) {
+            return withCors(
+                NextResponse.json({ error: "Invalid token" }, { status: 401 })
+            );
+        }
+    } catch (error) {
+        console.error("middleware token verification failed:", error);
         return withCors(
-            NextResponse.json({ error: "Invalid token" }, { status: 401 })
+            NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
         );
     }
+
+    return withCors(NextResponse.next());
 }
 
 export const config = {

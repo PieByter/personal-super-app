@@ -69,7 +69,7 @@ class _BookmarkFormScreenState extends State<BookmarkFormScreen> {
     try {
       final b = widget.bookmark;
       if (b != null) {
-        await ApiService().put('${ApiConstants.bookmarksUrl}/${b.id}', body);
+        await ApiService().put('${ApiConstants.bookmarksUrl}?id=${b.id}', body);
       } else {
         await ApiService().post(ApiConstants.bookmarksUrl, body);
       }
