@@ -1,8 +1,9 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { db } from "@/db";
-import { habits, habitLogs } from "@/db/schema";
+import { habits, habitLogs, users } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, gte, inArray } from "drizzle-orm";
+import { addDays, todayInTimeZone } from "@/lib/user-time";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -13,10 +14,17 @@ export async function GET(req: NextRequest) {
         .from(habits)
         .where(eq(habits.userId, user.userId));
 
+    const [profile] = await db
+        .select({ timezone: users.timezone })
+        .from(users)
+        .where(eq(users.id, user.userId))
+        .limit(1);
+
+    // Day boundaries follow the user's timezone, not the server's.
+    const today = todayInTimeZone(profile?.timezone);
+
     // Last 90 days of logs for streak + heatmap.
-    const since = new Date();
-    since.setDate(since.getDate() - 90);
-    const sinceStr = since.toISOString().split("T")[0];
+    const sinceStr = addDays(today, -90);
 
     const habitIds = userHabits.map((h) => h.id);
     const logs = habitIds.length === 0
@@ -37,7 +45,7 @@ export async function GET(req: NextRequest) {
         return {
             id: h.id,
             name: h.name,
-            currentStreak: computeStreak(dates),
+            currentStreak: computeStreak(dates, today),
             longestStreak: computeLongestStreak(dates),
             totalLogs: dates.size,
             last90Days: Array.from(dates).sort(),
@@ -47,39 +55,25 @@ export async function GET(req: NextRequest) {
     return Response.json(result);
 }
 
-function computeStreak(dates: Set<string>): number {
+/** Consecutive days up to `today`; a missing today does not break the streak yet. */
+function computeStreak(dates: Set<string>, today: string): number {
     let streak = 0;
-    const d = new Date();
-    // If today not logged, start from yesterday.
-    const todayStr = toDateStr(d);
-    if (!dates.has(todayStr)) {
-        d.setDate(d.getDate() - 1);
-    }
-    while (dates.has(toDateStr(d))) {
+    let day = dates.has(today) ? today : addDays(today, -1);
+    while (dates.has(day)) {
         streak++;
-        d.setDate(d.getDate() - 1);
+        day = addDays(day, -1);
     }
     return streak;
 }
 
 function computeLongestStreak(dates: Set<string>): number {
-    const sorted = Array.from(dates).sort();
     let longest = 0;
     let current = 0;
-    let prev: Date | null = null;
-    for (const s of sorted) {
-        const d = new Date(s + "T00:00:00");
-        if (prev && (d.getTime() - prev.getTime()) === 86400000) {
-            current++;
-        } else {
-            current = 1;
-        }
+    let previous: string | null = null;
+    for (const day of Array.from(dates).sort()) {
+        current = previous && addDays(previous, 1) === day ? current + 1 : 1;
         if (current > longest) longest = current;
-        prev = d;
+        previous = day;
     }
     return longest;
-}
-
-function toDateStr(d: Date): string {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

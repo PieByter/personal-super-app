@@ -1,6 +1,7 @@
 import { db } from "@/db";
-import { financeRecurringRules, financeTransactions } from "@/db/schema";
-import { eq, and, lte } from "drizzle-orm";
+import { financeRecurringRules, financeTransactions, users } from "@/db/schema";
+import { eq, and, lte, inArray } from "drizzle-orm";
+import { addDays, dateInTimeZone, todayInTimeZone } from "@/lib/user-time";
 
 /**
  * Processes all due recurring rules and generates transactions.
@@ -8,22 +9,39 @@ import { eq, and, lte } from "drizzle-orm";
  * (used by the scheduled cron).
  */
 export async function processDueRules(userId: string | null) {
-    const today = new Date().toISOString().split("T")[0];
+    // Inclusive cutoff so every user's own "today" is a candidate. The widest
+    // UTC offset is +14h, i.e. at most one calendar day ahead of UTC.
+    const cutoff = addDays(dateInTimeZone("UTC"), 1);
 
     const conditions = [
         eq(financeRecurringRules.isActive, true),
-        lte(financeRecurringRules.nextExecution, today),
+        lte(financeRecurringRules.nextExecution, cutoff),
     ];
     if (userId) conditions.push(eq(financeRecurringRules.userId, userId));
 
-    const dueRules = await db
+    const candidates = await db
         .select()
         .from(financeRecurringRules)
         .where(and(...conditions));
 
+    // Resolve each owner's timezone: "due today" must follow the user's day,
+    // not the server's.
+    const ownerIds = [...new Set(candidates.map((rule) => rule.userId))];
+    const timezones = new Map<string, string | null>();
+    if (ownerIds.length > 0) {
+        const owners = await db
+            .select({ id: users.id, timezone: users.timezone })
+            .from(users)
+            .where(inArray(users.id, ownerIds));
+        for (const owner of owners) timezones.set(owner.id, owner.timezone);
+    }
+
     const created: (typeof financeTransactions.$inferSelect)[] = [];
 
-    for (const rule of dueRules) {
+    for (const rule of candidates) {
+        const today = todayInTimeZone(timezones.get(rule.userId));
+        if (rule.nextExecution > today) continue; // not due yet in the user's timezone
+
         // Rule already past its end date: deactivate without generating.
         if (rule.endDate && rule.nextExecution > rule.endDate) {
             await db

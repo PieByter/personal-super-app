@@ -109,6 +109,10 @@ All endpoints follow the same shape — clients must match it exactly:
   Tokens are verified in `src/middleware.ts`, which runs on the Edge runtime and
   therefore uses `lib/jwt-edge.ts` (WebCrypto) instead of `jsonwebtoken`.
 - Optional fields accept `null` (to clear a value) as well as being omitted.
+- **Dates** are plain `YYYY-MM-DD` strings. "Today", the current month and the
+  90-day habit window are resolved in the user's `timezone` (`Asia/Jakarta` by
+  default) via `lib/user-time.ts`, not on the server clock — see
+  `GET`/`PUT /api/profile` where the timezone is validated as an IANA name.
 
 ## Deployment
 
@@ -163,10 +167,26 @@ vercel --prod
 
 ## Roadmap
 
-- [ ] Push notifications for reminders (needs Android/iOS platform)
-- [ ] Offline sync (SQLite) (needs Android/iOS platform)
+- [ ] **Image upload to object storage** — inventory photos and avatars are
+      currently embedded as base64 data URIs in `photoUrls` / `avatarUrl`, so
+      list responses carry the full image payloads. Upload endpoints + Vercel
+      Blob / S3 would fix this (`cached_network_image` is already a dependency).
+- [ ] **Reminder notifications** — `flutter_local_notifications` and `timezone`
+      are installed but unused; wire them to `habits.reminderTime`,
+      `subscriptions.reminderDays` and `finance_recurring_rules.nextExecution`.
+- [ ] **Offline-first sync** — `lib/data/local_db.dart` (sqflite) is not wired to
+      any screen yet; the connectivity banner only reports state.
+- [ ] Server-side search & pagination in the client (`?page=`/`?pageSize=` and a
+      `q` filter) instead of loading full lists and filtering in memory.
 - [ ] Home screen widget (needs Android platform)
-- [ ] Photo upload for inventory items / avatar (image_picker)
-- [ ] Calendar view for habits & journal (table_calendar)
-- [ ] Offline detection banner (connectivity_plus)
-- [ ] Home screen widget (needs Android platform)
+- [ ] Push notifications for reminders (needs a push service, not just local
+      notifications)
+
+## Done
+
+- [x] Photo capture for inventory items / avatar (stored as data URIs for now)
+- [x] Calendar view for habits (`table_calendar`)
+- [x] Offline detection banner (`connectivity_plus`)
+- [x] Dates resolved in the user's timezone instead of the server's
+- [x] Edge-compatible JWT verification + user-scoped child-resource writes
+

@@ -4,11 +4,19 @@ import { users } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { isValidTimeZone } from "@/lib/user-time";
+import { apiError } from "@/lib/api-error";
 
 const updateProfileSchema = z.object({
     fullName: z.string().min(1).max(255).optional(),
     avatarUrl: z.string().url().optional().nullable(),
-    timezone: z.string().max(50).optional(),
+    // Timezone drives day/month boundaries, so reject typos instead of
+    // silently falling back to UTC.
+    timezone: z
+        .string()
+        .max(50)
+        .refine(isValidTimeZone, "Use an IANA timezone, e.g. Asia/Jakarta")
+        .optional(),
     currency: z.string().max(10).optional(),
 });
 
@@ -68,6 +76,6 @@ export async function PUT(req: NextRequest) {
         if (!updated) return Response.json({ error: "User not found" }, { status: 404 });
         return Response.json(updated);
     } catch (e) {
-        return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 });
+        return apiError(e);
     }
 }

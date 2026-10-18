@@ -13,7 +13,7 @@ import {
 } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, gte, sql, count, sum } from "drizzle-orm";
-import { startOfMonth, format, subDays } from "date-fns";
+import { addDays, monthStartInTimeZone, todayInTimeZone } from "@/lib/user-time";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -25,9 +25,16 @@ export async function GET(req: NextRequest) {
     // but still receive their own personal dashboard below.
     const systemStats = isAdmin ? await getSystemStats() : null;
 
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const weekAgo = subDays(now, 7);
+    const [profile] = await db
+        .select({ timezone: users.timezone })
+        .from(users)
+        .where(eq(users.id, user.userId))
+        .limit(1);
+
+    // Month/week boundaries follow the user's timezone, not the server's.
+    const today = todayInTimeZone(profile?.timezone);
+    const monthStart = monthStartInTimeZone(profile?.timezone);
+    const weekAgo = addDays(today, -7);
 
     // All independent queries run in parallel
     const [
@@ -48,7 +55,7 @@ export async function GET(req: NextRequest) {
                 and(
                     eq(financeTransactions.userId, user.userId),
                     eq(financeTransactions.type, "income"),
-                    gte(financeTransactions.transactionDate, format(monthStart, "yyyy-MM-dd"))
+                    gte(financeTransactions.transactionDate, monthStart)
                 )
             ),
 
@@ -60,7 +67,7 @@ export async function GET(req: NextRequest) {
                 and(
                     eq(financeTransactions.userId, user.userId),
                     eq(financeTransactions.type, "expense"),
-                    gte(financeTransactions.transactionDate, format(monthStart, "yyyy-MM-dd"))
+                    gte(financeTransactions.transactionDate, monthStart)
                 )
             ),
 
@@ -97,7 +104,7 @@ export async function GET(req: NextRequest) {
             .where(
                 and(
                     eq(habits.userId, user.userId),
-                    gte(habitLogs.logDate, format(weekAgo, "yyyy-MM-dd"))
+                    gte(habitLogs.logDate, weekAgo)
                 )
             )
             .groupBy(habits.id, habits.name)

@@ -145,6 +145,8 @@ class ApiService {
       if (response.body.isEmpty) return null;
       return jsonDecode(response.body);
     }
-    throw Exception('API Error ${response.statusCode}: ${response.body}');
+    // Some server errors have an empty body; do not show a dangling colon.
+    final detail = response.body.isEmpty ? '' : ': ${response.body}';
+    throw Exception('API Error ${response.statusCode}$detail');
   }
 }

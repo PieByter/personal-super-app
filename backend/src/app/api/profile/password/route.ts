@@ -5,6 +5,7 @@ import { getAuthUser, unauthorizedResponse, hashPassword, verifyPassword } from 
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { apiError } from "@/lib/api-error";
 
 const changePasswordSchema = z.object({
     currentPassword: z.string().min(1),
@@ -45,6 +46,6 @@ export async function POST(req: NextRequest) {
 
         return Response.json({ success: true });
     } catch (e) {
-        return Response.json({ error: e instanceof Error ? e.message : "Error" }, { status: 400 });
+        return apiError(e);
     }
 }

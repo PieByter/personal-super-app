@@ -4,12 +4,16 @@ import { users } from "@/db/schema";
 import { getAuthUser, requireAdmin } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
+import { isValidTimeZone } from "@/lib/user-time";
 import { apiError } from "@/lib/api-error";
 
 const updateUserSchema = z.object({
     fullName: z.string().optional(),
     role: z.enum(["user", "admin"]).optional(),
-    timezone: z.string().optional(),
+    timezone: z
+        .string()
+        .refine(isValidTimeZone, "Use an IANA timezone, e.g. Asia/Jakarta")
+        .optional(),
     currency: z.string().optional(),
 });
 

@@ -205,7 +205,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: _timezoneController,
-                    decoration: const InputDecoration(labelText: 'Timezone'),
+                    decoration: const InputDecoration(
+                      labelText: 'Timezone',
+                      hintText: 'Asia/Jakarta',
+                      helperText: 'IANA name — used for daily/monthly boundaries',
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
