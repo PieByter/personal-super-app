@@ -50,30 +50,53 @@ personal-super-app/
 
 ## Getting Started
 
-### Backend
+### 1. Database
+
+Easiest — Docker. It starts Postgres and applies `database/schema.sql` on the first boot:
+
+```bash
+docker compose up -d
+# postgresql://user:password@localhost:5432/personal_super_app
+```
+
+Without Docker (Supabase / Neon / local Postgres), create a database and apply the schema:
+
+```bash
+psql "$DATABASE_URL" -f database/schema.sql
+```
+
+### 2. Backend
 
 ```bash
 cd backend
-cp .env.example .env
-# Edit .env with your DATABASE_URL and JWT_SECRET
+cp .env.example .env   # then set DATABASE_URL + JWT_SECRET (+ CRON_SECRET)
 npm install
-npm run db:migrate
-npm run dev
+npm run dev            # http://localhost:3000
 ```
 
-### Mobile Apps
+- `npm run seed` fills the demo account with sample data for all 10 modules
+  (login `demo@example.com` / `demo-password-123`; override with `SEED_EMAIL` /
+  `SEED_PASSWORD`, re-seed with `SEED_FORCE=1`).
+- Admin console at `http://localhost:3000/admin` — promote yourself via
+  `POST /api/admin/bootstrap` while no admin exists yet.
+- `next build` inlines env values into the Edge middleware, so make sure `.env`
+  exists before a production build.
+
+### 3. Mobile Apps
 
 ```bash
 cd mobile
 flutter pub get
-flutter run
+flutter run -d chrome      # web (uses http://localhost:3000/api by default)
+flutter run -d windows     # desktop
+flutter run                # Android / iOS device or emulator
 ```
 
-### Database Setup
+Point the app at another API:
 
 ```bash
-# Using psql or Supabase SQL Editor
-psql -d your_database -f database/schema.sql
+flutter run --dart-define=API_URL=http://10.0.2.2:3000/api     # Android emulator
+flutter run --dart-define=API_URL=https://your-api.vercel.app/api
 ```
 
 ## API Endpoints

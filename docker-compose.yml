@@ -1,0 +1,31 @@
+# Local development database.
+#
+#   docker compose up -d      # start Postgres (applies database/schema.sql on first boot)
+#   docker compose down       # stop it (data is kept in the named volume)
+#   docker compose down -v    # stop it AND wipe the data (re-applies the schema next start)
+#
+# The connection string matches backend/.env.example:
+#   postgresql://user:password@localhost:5432/personal_super_app
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: personal-super-app-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: personal_super_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      # Only runs while the volume is empty, i.e. on the first start.
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d personal_super_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db-data:
