@@ -1,6 +1,6 @@
 # Personal Super App
 
-Aplikasi super pribadi dengan 10 modul untuk mengelola seluruh aspek kehidupan: keuangan, produktivitas, karir, dan pembelajaran.
+Aplikasi super pribadi dengan 9 modul untuk mengelola seluruh aspek kehidupan: produktivitas, karir, dan pembelajaran.
 
 ## Arsitektur
 
@@ -10,25 +10,24 @@ personal-super-app/
 │   ├── src/app/api/  # REST API endpoints
 │   └── src/db/       # Database schema & connection
 ├── mobile/           # Flutter (iOS, Android, Web)
-│   ├── lib/presentation/modules/  # 10 module screens
+│   ├── lib/presentation/modules/  # 9 module screens
 │   └── lib/data/     # API service & local DB
 └── database/         # PostgreSQL schema.sql
 ```
 
-## 10 Modules
+## 9 Modules
 
 | # | Module | Description | Color |
 | --- | -------- | ------------- | ------- |
-| 1 | **Finance** | Income/expense, budgets, saving goals, investments | 🟢 Green |
-| 2 | **Dashboard** | Personal life overview & quick access | ⚪ Slate |
-| 3 | **Developer Journal** | Problem-solution database with tags | 🟣 Indigo |
-| 4 | **Bug Tracker** | Error tracking with statistics | 🔴 Red |
-| 5 | **Job Tracker** | Application pipeline & interviews | 🔵 Blue |
-| 6 | **Project Manager** | Goals, milestones, tasks, progress | 🟣 Purple |
-| 7 | **Habit Tracker** | Daily habits & productivity metrics | 🟡 Amber |
-| 8 | **Subscriptions** | Recurring costs & renewal reminders | 🩷 Pink |
-| 9 | **Inventory** | Personal items with warranty tracking | 🟢 Teal |
-| 10 | **Bookmarks** | Resource manager with collections | 🟠 Orange |
+| 1 | **Dashboard** | Personal life overview & quick access | ⚪ Slate |
+| 2 | **Developer Journal** | Problem-solution database with tags | 🟣 Indigo |
+| 3 | **Bug Tracker** | Error tracking with statistics | 🔴 Red |
+| 4 | **Job Tracker** | Application pipeline & interviews | 🔵 Blue |
+| 5 | **Project Manager** | Goals, milestones, tasks, progress | 🟣 Purple |
+| 6 | **Habit Tracker** | Daily habits & productivity metrics | 🟡 Amber |
+| 7 | **Subscriptions** | Recurring costs & renewal reminders | 🩷 Pink |
+| 8 | **Inventory** | Personal items with warranty tracking | 🟢 Teal |
+| 9 | **Bookmarks** | Resource manager with collections | 🟠 Orange |
 
 ## Tech Stack
 
@@ -69,12 +68,12 @@ psql "$DATABASE_URL" -f database/schema.sql
 
 ```bash
 cd backend
-cp .env.example .env   # then set DATABASE_URL + JWT_SECRET (+ CRON_SECRET)
+cp .env.example .env   # then set DATABASE_URL + JWT_SECRET
 npm install
 npm run dev            # http://localhost:3000
 ```
 
-- `npm run seed` fills the demo account with sample data for all 10 modules
+- `npm run seed` fills the demo account with sample data for all 9 modules
   (login `demo@example.com` / `demo-password-123`; override with `SEED_EMAIL` /
   `SEED_PASSWORD`, re-seed with `SEED_FORCE=1`).
 - Admin console at `http://localhost:3000/admin` — promote yourself via
@@ -105,7 +104,6 @@ flutter run --dart-define=API_URL=https://your-api.vercel.app/api
 | ---------- | -------- | ------------- |
 | `/api/auth` | POST | Login / Register |
 | `/api/dashboard` | GET | Aggregated dashboard data |
-| `/api/finance/transactions` | GET/POST | List / Create transactions |
 | `/api/journal` | GET/POST | Journal entries |
 | `/api/bugs` | GET/POST | Bug entries |
 | `/api/jobs` | GET/POST | Job applications |
@@ -145,7 +143,7 @@ Flutter app. Docker is only a local option for machines without Postgres.
 ### 1. Database (Supabase)
 
 Paste `database/schema.sql` into the Supabase SQL Editor and run it (it creates
-the 30+ tables, indexes, triggers and enables RLS). RLS is enabled without
+all tables, indexes and triggers, and enables RLS). RLS is enabled without
 policies on purpose: the backend connects as the table owner, and the app
 authenticates with its own JWTs — never expose the anon key to a client.
 
@@ -168,9 +166,6 @@ Environment variables:
 - `JWT_SECRET` — random secret. It must exist **at build time**: Next inlines env
   values into the Edge middleware, so a build without it produces an API that
   rejects every token with `401 Invalid token`.
-- `CRON_SECRET` — required, otherwise `vercel.json`'s daily
-  `GET /api/cron/recurring` job is refused; Vercel Cron sends it as
-  `Authorization: Bearer <CRON_SECRET>`.
 
 ### 3. Flutter app
 
@@ -196,18 +191,12 @@ Firebase Hosting. Native builds are distributed through the Play Store / App Sto
 - ✅ 401 auto-refresh + auto-logout on token expiry
 - ✅ **Pagination** on list endpoints (`?page=1&pageSize=20`)
 - ✅ **Admin bootstrap** endpoint (first user becomes admin)
-- ✅ **Charts & visualizations** (spending pie chart, income/expense bar chart)
-- ✅ **Recurring transaction automation** (rules + process due + **scheduled cron**)
-- ✅ **CSV import** for bank statements
-- ✅ **Investment price tracking** (Yahoo Finance refresh)
 - ✅ **Job Tracker statistics** (response/interview/offer rate)
-- ✅ **Budget utilization alerts** (warning/exceeded status)
 - ✅ **Habit streaks & heatmap** (90-day view)
 - ✅ **Custom accent color** (8 theme colors)
 - ✅ **Multi-language** (English / Bahasa Indonesia)
 - ✅ **PWA install** (web)
-- ✅ **Search & filter** in Finance, Journal, Bookmarks
-- ✅ **Swipe actions** (edit/delete) in Finance
+- ✅ **Search & filter** in Journal, Bookmarks
 - ✅ **Shimmer loading** states
 - ✅ **Open links** (bookmarks, job postings)
 - ✅ Dark mode support
@@ -226,8 +215,8 @@ Firebase Hosting. Native builds are distributed through the Play Store / App Sto
       list responses carry the full image payloads. Upload endpoints + Vercel
       Blob / S3 would fix this (`cached_network_image` is already a dependency).
 - [ ] **Reminder notifications** — `flutter_local_notifications` and `timezone`
-      are installed but unused; wire them to `habits.reminderTime`,
-      `subscriptions.reminderDays` and `finance_recurring_rules.nextExecution`.
+      are installed but unused; wire them to `habits.reminderTime` and
+      `subscriptions.reminderDays`.
 - [ ] **Offline-first sync** — `lib/data/local_db.dart` (sqflite) is not wired to
       any screen yet; the connectivity banner only reports state.
 - [ ] Server-side search & pagination in the client (`?page=`/`?pageSize=` and a
