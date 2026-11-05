@@ -2,11 +2,6 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import {
     users,
-    financeCategories,
-    financeTransactions,
-    financeBudgets,
-    financeSavingGoals,
-    financeInvestments,
     journalEntries,
     journalTags,
     bugEntries,
@@ -48,14 +43,6 @@ export async function GET(req: NextRequest) {
         .from(users)
         .where(eq(users.id, user.userId))
         .limit(1);
-
-    const [financeCategoriesRows, financeTransactionsRows, financeBudgetsRows, financeSavingGoalsRows, financeInvestmentsRows] = await Promise.all([
-        db.select().from(financeCategories).where(eq(financeCategories.userId, user.userId)),
-        db.select().from(financeTransactions).where(eq(financeTransactions.userId, user.userId)),
-        db.select().from(financeBudgets).where(eq(financeBudgets.userId, user.userId)),
-        db.select().from(financeSavingGoals).where(eq(financeSavingGoals.userId, user.userId)),
-        db.select().from(financeInvestments).where(eq(financeInvestments.userId, user.userId)),
-    ]);
 
     const [journalEntriesRows, journalTagsRows, bugEntriesRows] = await Promise.all([
         db.select().from(journalEntries).where(eq(journalEntries.userId, user.userId)),
@@ -111,13 +98,6 @@ export async function GET(req: NextRequest) {
     const data = {
         exportedAt: new Date().toISOString(),
         profile,
-        finance: {
-            categories: financeCategoriesRows,
-            transactions: financeTransactionsRows,
-            budgets: financeBudgetsRows,
-            savingGoals: financeSavingGoalsRows,
-            investments: financeInvestmentsRows,
-        },
         journal: {
             entries: journalEntriesRows,
             tags: journalTagsRows,

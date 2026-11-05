@@ -1,9 +1,9 @@
 ﻿/**
  * Date-only helpers anchored to a user's timezone.
  *
- * The API stores calendar data as plain `YYYY-MM-DD` strings, so "today",
- * "this month" and "N days ago" must be resolved in the user's timezone —
- * using the server clock shifts them by up to a day for users in other zones.
+ * The API stores calendar data as plain `YYYY-MM-DD` strings, so "today"
+ * and "N days ago" must be resolved in the user's timezone — using the
+ * server clock shifts them by up to a day for users in other zones.
  */
 
 const FALLBACK_TIMEZONE = "UTC";
@@ -32,11 +32,6 @@ export function dateInTimeZone(timeZone: string | null | undefined, at: Date = n
 /** Today's date in `timeZone`. */
 export function todayInTimeZone(timeZone: string | null | undefined, at: Date = new Date()): string {
     return dateInTimeZone(timeZone, at);
-}
-
-/** First day of the current month in `timeZone`. */
-export function monthStartInTimeZone(timeZone: string | null | undefined, at: Date = new Date()): string {
-    return `${todayInTimeZone(timeZone, at).slice(0, 7)}-01`;
 }
 
 /**

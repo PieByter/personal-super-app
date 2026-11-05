@@ -95,60 +95,6 @@ async function alreadySeeded() {
     return Array.isArray(bookmarks) && bookmarks.some((b) => b.title === MARKER);
 }
 
-async function seedFinance() {
-    console.log("Finance");
-    const salary = await create("/finance/categories", { name: "Gaji", type: "income", color: "#10B981" }, "category Gaji");
-    const food = await create("/finance/categories", { name: "Makan", type: "expense", color: "#EF4444" }, "category Makan");
-
-    await create("/finance/transactions", {
-        amount: "8500000",
-        type: "income",
-        transactionDate: localDate(-3),
-        description: "Gaji bulanan",
-        categoryId: salary.id,
-    }, "income transaction");
-    await create("/finance/transactions", {
-        amount: "75000",
-        type: "expense",
-        transactionDate: localDate(-1),
-        description: "Makan siang",
-        categoryId: food.id,
-        paymentMethod: "cash",
-        tags: ["harian"],
-    }, "expense transaction");
-
-    await create("/finance/budgets", {
-        categoryId: food.id,
-        amount: "2000000",
-        period: "monthly",
-        startDate: localDate(-10),
-    }, "budget bulanan");
-
-    await create("/finance/goals", {
-        name: "Dana darurat",
-        targetAmount: "20000000",
-        currentAmount: "5000000",
-        deadline: localDate(120),
-    }, "saving goal");
-
-    await create("/finance/recurring", {
-        amount: "150000",
-        type: "expense",
-        frequency: "monthly",
-        startDate: localDate(-30),
-        description: "Langganan musik",
-    }, "recurring rule");
-
-    await create("/finance/investments", {
-        name: "Reksa dana pasar uang",
-        type: "mutual_fund",
-        quantity: "10",
-        purchasePrice: "100000",
-        currentPrice: "103500",
-        purchaseDate: localDate(-60),
-    }, "investment");
-}
-
 async function seedProjects() {
     console.log("Projects");
     const project = await create("/projects", {
@@ -348,7 +294,6 @@ async function main() {
     }
 
     console.log("\nSeeding sample data...");
-    await seedFinance();
     await seedProjects();
     await seedHabits();
     await seedSubscriptions();

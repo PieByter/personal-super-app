@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { db } from "@/db";
 import {
     users,
-    financeTransactions,
     projects,
     projectTasks,
     habits,
@@ -13,7 +12,7 @@ import {
 } from "@/db/schema";
 import { getAuthUser, unauthorizedResponse } from "@/lib/auth";
 import { eq, and, gte, sql, count, sum } from "drizzle-orm";
-import { addDays, monthStartInTimeZone, todayInTimeZone } from "@/lib/user-time";
+import { addDays, todayInTimeZone } from "@/lib/user-time";
 
 export async function GET(req: NextRequest) {
     const user = getAuthUser(req);
@@ -31,15 +30,12 @@ export async function GET(req: NextRequest) {
         .where(eq(users.id, user.userId))
         .limit(1);
 
-    // Month/week boundaries follow the user's timezone, not the server's.
+    // Week boundaries follow the user's timezone, not the server's.
     const today = todayInTimeZone(profile?.timezone);
-    const monthStart = monthStartInTimeZone(profile?.timezone);
     const weekAgo = addDays(today, -7);
 
     // All independent queries run in parallel
     const [
-        [incomeRow],
-        [expenseRow],
         [projectStats],
         [taskStats],
         habitStats,
@@ -47,30 +43,6 @@ export async function GET(req: NextRequest) {
         [bugStats],
         [subSummary],
     ] = await Promise.all([
-        // Income this month
-        db
-            .select({ total: sum(financeTransactions.amount) })
-            .from(financeTransactions)
-            .where(
-                and(
-                    eq(financeTransactions.userId, user.userId),
-                    eq(financeTransactions.type, "income"),
-                    gte(financeTransactions.transactionDate, monthStart)
-                )
-            ),
-
-        // Expense this month
-        db
-            .select({ total: sum(financeTransactions.amount) })
-            .from(financeTransactions)
-            .where(
-                and(
-                    eq(financeTransactions.userId, user.userId),
-                    eq(financeTransactions.type, "expense"),
-                    gte(financeTransactions.transactionDate, monthStart)
-                )
-            ),
-
         // Project stats
         db
             .select({
@@ -147,10 +119,6 @@ export async function GET(req: NextRequest) {
     return Response.json({
         isAdmin,
         ...(systemStats ? { systemStats } : {}),
-        finance: {
-            monthIncome: incomeRow?.total || "0",
-            monthExpense: expenseRow?.total || "0",
-        },
         projects: projectStats,
         tasks: taskStats,
         habits: habitStats,
@@ -166,7 +134,6 @@ export async function GET(req: NextRequest) {
 async function getSystemStats() {
     const [
         [userCount],
-        [totalTransactions],
         [totalProjects],
         [totalTasks],
         [totalHabits],
@@ -175,7 +142,6 @@ async function getSystemStats() {
         [totalSubscriptions],
     ] = await Promise.all([
         db.select({ total: count(users.id) }).from(users),
-        db.select({ total: count(financeTransactions.id) }).from(financeTransactions),
         db.select({ total: count(projects.id) }).from(projects),
         db.select({ total: count(projectTasks.id) }).from(projectTasks),
         db.select({ total: count(habits.id) }).from(habits),
@@ -186,7 +152,6 @@ async function getSystemStats() {
 
     return {
         totalUsers: userCount?.total || 0,
-        totalTransactions: totalTransactions?.total || 0,
         totalProjects: totalProjects?.total || 0,
         totalTasks: totalTasks?.total || 0,
         totalHabits: totalHabits?.total || 0,

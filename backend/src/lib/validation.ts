@@ -12,25 +12,6 @@ export const registerSchema = z.object({
     fullName: z.string().min(2).max(255).optional(),
 });
 
-// Finance
-export const transactionSchema = z.object({
-    categoryId: z.string().uuid().optional(),
-    amount: z.string().or(z.number()),
-    type: z.enum(["income", "expense"]),
-    description: z.string().max(500).optional(),
-    transactionDate: z.string(),
-    paymentMethod: z.string().max(100).optional(),
-    tags: z.array(z.string().max(50)).max(20).optional(),
-});
-
-export const categorySchema = z.object({
-    name: z.string().min(1).max(100),
-    type: z.enum(["income", "expense"]),
-    color: z.string().max(7).optional(),
-    icon: z.string().max(50).optional(),
-    parentId: z.string().uuid().optional(),
-});
-
 // Journal
 export const journalEntrySchema = z.object({
     title: z.string().min(1).max(255),

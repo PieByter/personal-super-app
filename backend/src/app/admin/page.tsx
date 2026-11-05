@@ -6,7 +6,6 @@ import { adminFetch, clearAdminSession } from "@/lib/admin-fetch";
 
 interface SystemStats {
   totalUsers: number;
-  totalTransactions: number;
   totalProjects: number;
   totalTasks: number;
   totalHabits: number;
@@ -63,7 +62,6 @@ export default function AdminDashboard() {
 
   const statCards = [
     { label: "Users", value: stats.totalUsers, color: "#64748B", icon: "👥" },
-    { label: "Transactions", value: stats.totalTransactions, color: "#10B981", icon: "💳" },
     { label: "Projects", value: stats.totalProjects, color: "#8B5CF6", icon: "📁" },
     { label: "Tasks", value: stats.totalTasks, color: "#3B82F6", icon: "✅" },
     { label: "Habits", value: stats.totalHabits, color: "#F59E0B", icon: "🔄" },

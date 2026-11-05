@@ -1,8 +1,5 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const transactionTypeEnum = pgEnum("transaction_type", ["income", "expense"]);
-export const frequencyEnum = pgEnum("frequency", ["daily", "weekly", "monthly", "yearly"]);
-export const budgetPeriodEnum = pgEnum("budget_period", ["weekly", "monthly", "yearly"]);
 export const bugStatusEnum = pgEnum("bug_status", ["open", "in_progress", "solved", "closed"]);
 export const bugSeverityEnum = pgEnum("bug_severity", ["low", "medium", "high", "critical"]);
 export const jobStatusEnum = pgEnum("job_status", ["applied", "screening", "interview", "technical_test", "offer", "rejected", "withdrawn", "accepted"]);

@@ -7,7 +7,6 @@ import type { ZodTypeAny } from "zod";
 import {
     bookmarkSchema,
     bugEntrySchema,
-    categorySchema,
     dailyMetricSchema,
     habitLogSchema,
     habitSchema,
@@ -20,15 +19,10 @@ import {
     projectTaskSchema,
     registerSchema,
     subscriptionSchema,
-    transactionSchema,
 } from "@/lib/validation";
 
 /** Endpoints whose schema lives in the route file, keyed by required fields. */
 const REQUIRED_FIELDS: Record<string, string[]> = {
-    "/finance/budgets": ["amount", "period", "startDate"],
-    "/finance/goals": ["name", "targetAmount"],
-    "/finance/recurring": ["amount", "type", "frequency", "startDate"],
-    "/finance/investments": ["name", "type", "quantity", "purchasePrice", "purchaseDate"],
     "/projects/milestones": ["projectId", "title"],
     "/subscriptions/payments": ["subscriptionId", "amount", "paymentDate"],
     "/jobs/contacts": ["jobId", "name"],
@@ -39,8 +33,6 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
 };
 
 const SCHEMAS: Record<string, ZodTypeAny> = {
-    "/finance/categories": categorySchema,
-    "/finance/transactions": transactionSchema,
     "/projects": projectSchema,
     "/projects/tasks": projectTaskSchema,
     "/habits": habitSchema,
@@ -63,12 +55,6 @@ interface Recorded {
 
 const EXPECTED_PATHS = [
     "/auth",
-    "/finance/categories",
-    "/finance/transactions",
-    "/finance/budgets",
-    "/finance/goals",
-    "/finance/recurring",
-    "/finance/investments",
     "/projects",
     "/projects/milestones",
     "/projects/tasks",

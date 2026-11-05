@@ -3,7 +3,6 @@ import {
     addDays,
     dateInTimeZone,
     isValidTimeZone,
-    monthStartInTimeZone,
     todayInTimeZone,
 } from "./user-time";
 
@@ -16,14 +15,6 @@ describe("user-time", () => {
         expect(dateInTimeZone("Asia/Jakarta", lateEveningUtc)).toBe("2026-10-19");
         expect(dateInTimeZone("America/Los_Angeles", lateEveningUtc)).toBe("2026-10-18");
         expect(dateInTimeZone("Pacific/Kiritimati", lateEveningUtc)).toBe("2026-10-19");
-    });
-
-    it("starts the month in the user's timezone", () => {
-        // 2026-11-01T02:00Z is already November in Jakarta, still October in LA.
-        const acrossMonthBoundary = new Date("2026-11-01T02:00:00Z");
-        expect(monthStartInTimeZone("Asia/Jakarta", acrossMonthBoundary)).toBe("2026-11-01");
-        expect(monthStartInTimeZone("UTC", acrossMonthBoundary)).toBe("2026-11-01");
-        expect(monthStartInTimeZone("America/Los_Angeles", acrossMonthBoundary)).toBe("2026-10-01");
     });
 
     it("falls back to UTC for missing or invalid timezones", () => {

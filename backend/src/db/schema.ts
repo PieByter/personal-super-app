@@ -2,7 +2,6 @@
 // Drizzle-kit reads this file (see drizzle.config.ts) and follows the re-exports.
 export * from "./schema/enums";
 export * from "./schema/users";
-export * from "./schema/finance";
 export * from "./schema/journal";
 export * from "./schema/bugs";
 export * from "./schema/jobs";
