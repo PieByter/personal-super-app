@@ -19,21 +19,6 @@ class LocalDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
-        // Offline transactions
-        await db.execute('''
-          CREATE TABLE offline_transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            amount REAL NOT NULL,
-            type TEXT NOT NULL,
-            description TEXT,
-            transaction_date TEXT NOT NULL,
-            category_id TEXT,
-            payment_method TEXT,
-            synced INTEGER DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-          )
-        ''');
-
         // Offline habit logs
         await db.execute('''
           CREATE TABLE offline_habit_logs (
@@ -67,28 +52,6 @@ class LocalDatabase {
         ''');
       },
     );
-  }
-
-  Future<int> insertOfflineTransaction(Map<String, dynamic> data) async {
-    final db = await database;
-    return db.insert('offline_transactions', data);
-  }
-
-  Future<List<Map<String, dynamic>>> getUnsyncedTransactions() async {
-    final db = await database;
-    return db.query('offline_transactions', where: 'synced = 0');
-  }
-
-  Future<void> markTransactionsSynced(List<int> ids) async {
-    final db = await database;
-    for (final id in ids) {
-      await db.update(
-        'offline_transactions',
-        {'synced': 1},
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-    }
   }
 
   Future<int> insertOfflineHabitLog(Map<String, dynamic> data) async {

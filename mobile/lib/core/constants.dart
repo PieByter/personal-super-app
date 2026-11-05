@@ -7,12 +7,6 @@ class ApiConstants {
   );
   static const String authUrl = '$baseUrl/auth';
   static const String dashboardUrl = '$baseUrl/dashboard';
-  static const String transactionsUrl = '$baseUrl/finance/transactions';
-  static const String categoriesUrl = '$baseUrl/finance/categories';
-  static const String budgetsUrl = '$baseUrl/finance/budgets';
-  static const String goalsUrl = '$baseUrl/finance/goals';
-  static const String investmentsUrl = '$baseUrl/finance/investments';
-  static const String recurringUrl = '$baseUrl/finance/recurring';
   static const String journalUrl = '$baseUrl/journal';
   static const String bugsUrl = '$baseUrl/bugs';
   static const String jobsUrl = '$baseUrl/jobs';
@@ -23,8 +17,6 @@ class ApiConstants {
   static const String subscriptionsUrl = '$baseUrl/subscriptions';
   static const String inventoryUrl = '$baseUrl/inventory';
   static const String bookmarksUrl = '$baseUrl/bookmarks';
-  static const String budgetUtilizationUrl =
-      '$baseUrl/finance/budgets/utilization';
 }
 
 class StorageKeys {
@@ -39,7 +31,6 @@ class StorageKeys {
 }
 
 class AppColors {
-  static const Color finance = Color(0xFF10B981);
   static const Color journal = Color(0xFF6366F1);
   static const Color bugs = Color(0xFFEF4444);
   static const Color jobs = Color(0xFF3B82F6);

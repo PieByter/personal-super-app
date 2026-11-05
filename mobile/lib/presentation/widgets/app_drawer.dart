@@ -18,12 +18,6 @@ class AppDrawer extends StatelessWidget {
         AppColors.dashboard,
       ),
       _ModuleItem(
-        'Finance',
-        Icons.account_balance_wallet_outlined,
-        '/finance',
-        AppColors.finance,
-      ),
-      _ModuleItem(
         'Journal',
         Icons.book_outlined,
         '/journal',

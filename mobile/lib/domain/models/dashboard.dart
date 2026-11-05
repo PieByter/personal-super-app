@@ -1,5 +1,4 @@
 class DashboardData {
-  final FinanceSummary finance;
   final ProjectStats projects;
   final TaskStats tasks;
   final List<HabitStat> habits;
@@ -8,7 +7,6 @@ class DashboardData {
   final SubscriptionSummary subscriptions;
 
   DashboardData({
-    required this.finance,
     required this.projects,
     required this.tasks,
     required this.habits,
@@ -19,7 +17,6 @@ class DashboardData {
 
   factory DashboardData.fromJson(Map<String, dynamic> json) {
     return DashboardData(
-      finance: FinanceSummary.fromJson(json['finance']),
       projects: ProjectStats.fromJson(json['projects']),
       tasks: TaskStats.fromJson(json['tasks']),
       habits:
@@ -30,20 +27,6 @@ class DashboardData {
       jobs: JobStats.fromJson(json['jobs']),
       bugs: BugStats.fromJson(json['bugs']),
       subscriptions: SubscriptionSummary.fromJson(json['subscriptions']),
-    );
-  }
-}
-
-class FinanceSummary {
-  final String monthIncome;
-  final String monthExpense;
-
-  FinanceSummary({required this.monthIncome, required this.monthExpense});
-
-  factory FinanceSummary.fromJson(Map<String, dynamic> json) {
-    return FinanceSummary(
-      monthIncome: json['monthIncome'] ?? '0',
-      monthExpense: json['monthExpense'] ?? '0',
     );
   }
 }

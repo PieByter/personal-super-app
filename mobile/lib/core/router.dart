@@ -6,14 +6,6 @@ import '../data/api_service.dart';
 import '../presentation/modules/auth/login_screen.dart';
 import '../presentation/modules/auth/lock_screen.dart';
 import '../presentation/modules/dashboard/dashboard_screen.dart';
-import '../presentation/modules/finance/finance_screen.dart';
-import '../presentation/modules/finance/transaction_form_screen.dart';
-import '../presentation/modules/finance/budget_form_screen.dart';
-import '../presentation/modules/finance/goal_form_screen.dart';
-import '../presentation/modules/finance/investment_form_screen.dart';
-import '../presentation/modules/finance/recurring_form_screen.dart';
-import '../presentation/modules/finance/finance_category_form_screen.dart';
-import '../presentation/modules/finance/budget_utilization_screen.dart';
 import '../presentation/modules/journal/journal_screen.dart';
 import '../presentation/modules/journal/journal_entry_form_screen.dart';
 import '../presentation/modules/journal/journal_tags_screen.dart';
@@ -46,12 +38,6 @@ import '../presentation/modules/bookmarks/bookmark_collections_screen.dart';
 import '../presentation/modules/settings/settings_screen.dart';
 import '../presentation/modules/settings/export_screen.dart';
 import '../presentation/modules/settings/profile_screen.dart';
-import '../domain/models/transaction.dart';
-import '../domain/models/budget.dart';
-import '../domain/models/goal.dart';
-import '../domain/models/investment.dart';
-import '../domain/models/recurring_rule.dart';
-
 import '../domain/models/journal.dart';
 import '../domain/models/bug.dart';
 import '../domain/models/job.dart';
@@ -102,68 +88,6 @@ class AppRouter {
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: '/finance',
-        builder: (context, state) => const FinanceScreen(),
-      ),
-      GoRoute(
-        path: '/finance/transactions/new',
-        builder: (context, state) => const TransactionFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/transactions/edit',
-        builder: (context, state) => TransactionFormScreen(
-          transaction: state.extra as Transaction?,
-        ),
-      ),
-      GoRoute(
-        path: '/finance/budgets/new',
-        builder: (context, state) => const BudgetFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/budgets/edit',
-        builder: (context, state) => BudgetFormScreen(
-          budget: state.extra as Budget?,
-        ),
-      ),
-      GoRoute(
-        path: '/finance/goals/new',
-        builder: (context, state) => const GoalFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/goals/edit',
-        builder: (context, state) => GoalFormScreen(
-          goal: state.extra as SavingGoal?,
-        ),
-      ),
-      GoRoute(
-        path: '/finance/investments/new',
-        builder: (context, state) => const InvestmentFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/investments/edit',
-        builder: (context, state) => InvestmentFormScreen(
-          investment: state.extra as Investment?,
-        ),
-      ),
-      GoRoute(
-        path: '/finance/recurring/new',
-        builder: (context, state) => const RecurringFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/recurring/edit',
-        builder: (context, state) => RecurringFormScreen(
-          rule: state.extra as RecurringRule?,
-        ),
-      ),
-      GoRoute(
-        path: '/finance/categories',
-        builder: (context, state) => const FinanceCategoryFormScreen(),
-      ),
-      GoRoute(
-        path: '/finance/budget-utilization',
-        builder: (context, state) => const BudgetUtilizationScreen(),
       ),
       GoRoute(
         path: '/journal',

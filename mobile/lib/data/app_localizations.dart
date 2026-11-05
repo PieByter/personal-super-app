@@ -25,7 +25,6 @@ class AppLocalizations {
   String get exportData => _t('exportData');
   String get signOut => _t('signOut');
   String get dashboard => _t('dashboard');
-  String get finance => _t('finance');
   String get journal => _t('journal');
   String get bugTracker => _t('bugTracker');
   String get jobTracker => _t('jobTracker');
@@ -51,7 +50,6 @@ class AppLocalizations {
     'exportData': 'Export Data',
     'signOut': 'Sign Out',
     'dashboard': 'Dashboard',
-    'finance': 'Finance',
     'journal': 'Journal',
     'bugTracker': 'Bug Tracker',
     'jobTracker': 'Job Tracker',
@@ -73,7 +71,6 @@ class AppLocalizations {
     'exportData': 'Ekspor Data',
     'signOut': 'Keluar',
     'dashboard': 'Dasbor',
-    'finance': 'Keuangan',
     'journal': 'Jurnal',
     'bugTracker': 'Pelacak Bug',
     'jobTracker': 'Pelacak Lamaran',

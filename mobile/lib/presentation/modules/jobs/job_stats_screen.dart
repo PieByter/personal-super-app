@@ -61,7 +61,7 @@ class _JobStatsScreenState extends State<JobStatsScreen> {
                             'Response Rate',
                             '${_stats!['responseRate'] ?? 0}%',
                             Icons.reply,
-                            AppColors.finance,
+                            Colors.green,
                           ),
                           const SizedBox(height: 12),
                           _buildRateCard(

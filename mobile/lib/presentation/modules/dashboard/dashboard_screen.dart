@@ -4,7 +4,6 @@ import '../../../core/constants.dart';
 import '../../../data/api_service.dart';
 import '../../../domain/models/dashboard.dart';
 import '../../widgets/app_drawer.dart';
-import '../../widgets/income_expense_bar_chart.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -61,24 +60,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _buildSectionTitle('Overview'),
                             const SizedBox(height: 12),
                             _buildStatsGrid(),
-                            const SizedBox(height: 24),
-                            _buildSectionTitle('Finance This Month'),
-                            const SizedBox(height: 12),
-                            _buildFinanceCard(),
-                            const SizedBox(height: 12),
-                            Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: IncomeExpenseBarChart(
-                                  income: double.parse(
-                                    _data!.finance.monthIncome,
-                                  ),
-                                  expense: double.parse(
-                                    _data!.finance.monthExpense,
-                                  ),
-                                ),
-                              ),
-                            ),
                             const SizedBox(height: 24),
                             _buildSectionTitle('Active Habits (7 days)'),
                             const SizedBox(height: 12),
@@ -164,64 +145,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildFinanceCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Income',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Rp ${_data!.finance.monthIncome}',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.finance,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Container(height: 40, width: 1, color: Colors.grey.shade300),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Expense',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Rp ${_data!.finance.monthExpense}',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppColors.bugs,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildHabitsList() {
     if (_data!.habits.isEmpty) {
       return const Card(
@@ -255,12 +178,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildQuickAccessGrid() {
     final items = [
-      _QuickItem(
-        'Add Transaction',
-        Icons.add_card,
-        AppColors.finance,
-        '/finance',
-      ),
       _QuickItem('New Journal', Icons.edit_note, AppColors.journal, '/journal'),
       _QuickItem('Log Bug', Icons.bug_report, AppColors.bugs, '/bugs'),
       _QuickItem('Add Job', Icons.work, AppColors.jobs, '/jobs'),
