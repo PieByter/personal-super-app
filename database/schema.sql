@@ -41,97 +41,7 @@ CREATE TABLE password_resets (
 );
 
 -- =====================================================
--- 2. PERSONAL FINANCE MODULE
--- =====================================================
-CREATE TABLE finance_categories (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('income', 'expense')),
-    color VARCHAR(7) DEFAULT '#3B82F6',
-    icon VARCHAR(50),
-    parent_id UUID REFERENCES finance_categories(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE finance_transactions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES finance_categories(id),
-    amount DECIMAL(15, 2) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('income', 'expense')),
-    description TEXT,
-    transaction_date DATE NOT NULL,
-    payment_method VARCHAR(50),
-    is_recurring BOOLEAN DEFAULT FALSE,
-    recurring_rule_id UUID,
-    tags TEXT[],
-    attachment_url TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE finance_recurring_rules (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES finance_categories(id),
-    amount DECIMAL(15, 2) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('income', 'expense')),
-    frequency VARCHAR(20) NOT NULL CHECK (frequency IN ('daily', 'weekly', 'monthly', 'yearly')),
-    interval INTEGER DEFAULT 1,
-    start_date DATE NOT NULL,
-    end_date DATE,
-    description TEXT,
-    next_execution DATE NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE finance_budgets (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES finance_categories(id),
-    amount DECIMAL(15, 2) NOT NULL,
-    period VARCHAR(20) NOT NULL CHECK (period IN ('weekly', 'monthly', 'yearly')),
-    start_date DATE NOT NULL,
-    end_date DATE,
-    alert_threshold DECIMAL(5, 2) DEFAULT 80.00,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE finance_saving_goals (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    target_amount DECIMAL(15, 2) NOT NULL,
-    current_amount DECIMAL(15, 2) DEFAULT 0,
-    deadline DATE,
-    color VARCHAR(7) DEFAULT '#10B981',
-    icon VARCHAR(50),
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-CREATE TABLE finance_investments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    symbol VARCHAR(20),
-    quantity DECIMAL(15, 6) NOT NULL,
-    purchase_price DECIMAL(15, 2) NOT NULL,
-    current_price DECIMAL(15, 2),
-    purchase_date DATE NOT NULL,
-    broker VARCHAR(100),
-    notes TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- =====================================================
--- 3. DEVELOPER JOURNAL MODULE
+-- 2. DEVELOPER JOURNAL MODULE
 -- =====================================================
 CREATE TABLE journal_entries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -164,7 +74,7 @@ CREATE TABLE journal_entry_tags (
 );
 
 -- =====================================================
--- 4. BUG TRACKER MODULE
+-- 3. BUG TRACKER MODULE
 -- =====================================================
 CREATE TABLE bug_entries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -186,7 +96,7 @@ CREATE TABLE bug_entries (
 );
 
 -- =====================================================
--- 5. JOB APPLICATION TRACKER MODULE
+-- 4. JOB APPLICATION TRACKER MODULE
 -- =====================================================
 CREATE TABLE job_websites (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -247,7 +157,7 @@ CREATE TABLE job_contacts (
 );
 
 -- =====================================================
--- 6. PERSONAL PROJECT MANAGER MODULE
+-- 5. PERSONAL PROJECT MANAGER MODULE
 -- =====================================================
 CREATE TABLE projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -296,7 +206,7 @@ CREATE TABLE project_tasks (
 );
 
 -- =====================================================
--- 7. HABIT & PRODUCTIVITY TRACKER MODULE
+-- 6. HABIT & PRODUCTIVITY TRACKER MODULE
 -- =====================================================
 CREATE TABLE habits (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -346,7 +256,7 @@ CREATE TABLE daily_metrics (
 );
 
 -- =====================================================
--- 8. SUBSCRIPTION TRACKER MODULE
+-- 7. SUBSCRIPTION TRACKER MODULE
 -- =====================================================
 CREATE TABLE subscriptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -377,7 +287,7 @@ CREATE TABLE subscription_payments (
 );
 
 -- =====================================================
--- 9. PERSONAL INVENTORY MODULE
+-- 8. PERSONAL INVENTORY MODULE
 -- =====================================================
 CREATE TABLE inventory_categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -413,7 +323,7 @@ CREATE TABLE inventory_items (
 );
 
 -- =====================================================
--- 10. BOOKMARK / RESOURCE MANAGER MODULE
+-- 9. BOOKMARK / RESOURCE MANAGER MODULE
 -- =====================================================
 CREATE TABLE bookmark_collections (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -445,18 +355,6 @@ CREATE TABLE bookmarks (
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
-
--- Finance
-CREATE INDEX idx_transactions_user_date ON finance_transactions(user_id, transaction_date DESC);
-CREATE INDEX idx_transactions_category ON finance_transactions(category_id);
-CREATE INDEX idx_transactions_type ON finance_transactions(type);
-CREATE INDEX idx_finance_categories_user ON finance_categories(user_id);
-CREATE INDEX idx_budgets_user ON finance_budgets(user_id);
-CREATE INDEX idx_saving_goals_user ON finance_saving_goals(user_id);
-CREATE INDEX idx_investments_user ON finance_investments(user_id);
-
--- Recurring
-CREATE INDEX idx_recurring_next_exec ON finance_recurring_rules(next_execution) WHERE is_active = TRUE;
 
 -- Journal
 CREATE INDEX idx_journal_entries_user ON journal_entries(user_id, created_at DESC);
@@ -511,15 +409,6 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_transactions_updated_at BEFORE UPDATE ON finance_transactions
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_saving_goals_updated_at BEFORE UPDATE ON finance_saving_goals
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_investments_updated_at BEFORE UPDATE ON finance_investments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_journal_entries_updated_at BEFORE UPDATE ON journal_entries
@@ -579,12 +468,6 @@ CREATE TRIGGER set_bug_code BEFORE INSERT ON bug_entries
 -- ROW LEVEL SECURITY (RLS) POLICIES - For Supabase
 -- =====================================================
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_transactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_recurring_rules ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_budgets ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_saving_goals ENABLE ROW LEVEL SECURITY;
-ALTER TABLE finance_investments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entry_tags ENABLE ROW LEVEL SECURITY;
@@ -607,4 +490,4 @@ ALTER TABLE bookmark_collections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookmarks ENABLE ROW LEVEL SECURITY;
 
 -- Note: Create policies in Supabase dashboard or via migration
--- Example: CREATE POLICY "Users can only access their own data" ON finance_transactions FOR ALL USING (auth.uid() = user_id);
+-- Example: CREATE POLICY "Users can only access their own data" ON journal_entries FOR ALL USING (auth.uid() = user_id);
